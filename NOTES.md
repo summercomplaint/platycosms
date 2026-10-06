@@ -14,7 +14,7 @@ Status of the transcription check: **see the end of this file** ("Verification l
 ## 0. Basics
 
 A *platycosm* (Conway's name) is a compact flat 3-manifold without boundary, i.e. R³/Γ for a discrete group Γ of isometries
-acting freely (no fixed points). There are exactly 10 [paper §1, Appendix I]. They are known since Nowacki and Hantzsche–Wendt, 1934.
+acting freely (no fixed points). There are exactly 10 [paper §1, Appendix I]. They were known by about 1933 (found by Nowacki and by Hantzsche–Wendt, both 1934) [paper §1, §3].
 
 - Six are orientable ("chiral"): c1, c2, c3, c4, c6 (the *helicosms*: a lattice of translations plus a screw motion of period N = 1, 2, 3, 4, 6)
   and c22 (the *didicosm*, also the Hantzsche–Wendt manifold) [paper §3, p.5].
@@ -23,7 +23,7 @@ acting freely (no fixed points). There are exactly 10 [paper §1, Appendix I]. T
   mirror of first or second return, i.e. walking perpendicular to a glide mirror you hit the mirror again at the same point (first) or a different point (second) [paper §4, p.15–16].
 - c3, c4, c6 are *metachiral*: two enantiomorphic forms (dextral/sinistral screw), so there are 9 oriented types in all [paper §3, p.10].
 - Names: torocosm (c1), dicosm (c2), tricosm (c3), tetracosm (c4), hexacosm (c6), didicosm (c22),
-  first/second amphicosm (+a1, −a1), first/second amphidicosm (+a2, −a2) [paper §3, Table 11].
+  first/second amphicosm (+a1, −a1), first/second amphidicosm (+a2, −a2) [paper §3; names and notations in Appendix III, Table 11, p.45].
 
 ## 1. Table of facts (one row per platycosm)
 
@@ -109,6 +109,8 @@ Notation: (2T) circle of 2-sided tori, (2K) circle of 2-sided Klein bottles, [1K
 | +a2 | [+1gsK (2K) +1gsK]^1 ; (2K)^1, [∓1sK (2T) ∓1gT]^1 |
 | −a2 | [−1gT (2T) −1sK]^1 ; (2K)^1, [∓1sK (2T) ∓1gT]^1 |
 
+Footnote: for ±a2 the prose on p.18 describes the perpendal interval as [1sK (2T) 1gK] while Table 4 (p.19) has [∓1sK (2T) ∓1gT]; we follow the table.
+
 ## 5. Double covers [paper §8, Table 8, p.28–30]
 
 A double cover corresponds to a homomorphism π₁ → {±1} onto; the number is 2^r − 1 where r is the rank of H₁ mod 2.
@@ -159,11 +161,11 @@ A, B, C, D are the paper's shape parameters (conorms of the "naming lattice"; A,
 | +a2 | min(A, B, C) | (A+B+C)/4 |
 | −a2 | min(A, B, 4C) | ≥ ¼ max(β, γ) |
 
-Volume of c22 with screw lengths a, b, c: 2abc [paper p.13]. The paper conjectures every platycosm's diameter equals its orbit-lattice bound.
+Volume of c22 with screw lengths a, b, c: 2abc [paper p.13]. Footnote: for −a2 the proof text on p.31 says min(A, B, 4D) while Table 9 says min(A, B, 4C); the paper is inconsistent with itself (D vs C is the screw-direction parameter) and we follow Table 9. The paper conjectures every platycosm's diameter equals its orbit-lattice bound.
 
 ## 8. Conventions used in *our* code (not the paper's)
 
-The paper's generators are in lattice (non-orthonormal) coordinates; ours are Cartesian special cases. They are the paper's Table 12 generators:
+The paper's generators (Table 12) are in lattice, non-orthonormal coordinates; ours are Cartesian groups that are equivalent to them (same space group), not literal transcriptions. In particular our c2 uses a slide of 1 with lattice (0,0,2) where the paper has ½ with lattice Z³ (same group after rescaling z), and our −a1 is an orthogonal member of the Cc family:
 
 - c1: translations. c2: (x,y,z) → (−x, −y, z+1) with lattice (1,0,0),(0,1,0),(0,0,2). c3, c4, c6: rotation by 120°, 90°, 60° about the vertical axis with a slide of 1.
 - c22: (−x, y+½, −z+½), (x+½, −y, −z), lattice Z³ [Table 12].
@@ -185,4 +187,4 @@ Egan's picture of the didicosm has 6 edge colours; ours has 5 (a different, equa
 
 ## 10. Verification log
 
-- (pending) A fresh reader re-checks every `[paper]` fact above against the PDF. Results go here.
+- 2026-10-05: a fresh subagent re-read the PDF (via pdftotext) and checked about 150 field-level facts in this file and in `src/data/facts.ts`. **No data discrepancies.** It found the two internal inconsistencies of the paper noted in §4 and §7, and that the column alignment of Tables 9, 11, 12 had to be inferred from entry counts (row assignments are consistent). The [computed] and [derived] facts were out of its scope.
