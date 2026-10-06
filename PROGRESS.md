@@ -24,7 +24,7 @@ Style follows Greg Egan's "Loops Across Space" coloured-cylinder figure. Math so
 - [x] 4. Restyle (translucent tubes, solid same-colour arrows, narrow tubes) + panel built from facts
 - [x] 5. Inside view + fiddler crab
 - [x] 6. Symmetry animation (3 generators; ghost copy outside, whole tiling inside)
-- [~] 7. CI, README, final push (CI workflow written; check its first run on GitHub)
+- [x] 7. CI, README, final push (CI green on the first run)
 
 ## Log
 - v1 (Artifact) and v2 (standalone HTML, CPU-clipped closed meshes) done before this repo existed; see `legacy/`.
