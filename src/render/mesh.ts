@@ -146,7 +146,7 @@ export interface ModelOptions {
 }
 
 /** Proportions, in units of the tube radius r. Narrow tubes, short arrowheads with a wide flare. */
-export const STYLE = { ball: 1.75, arrowLen: 2.4, arrowFlare: 2.2 };
+export const STYLE = { ball: 1.6, arrowLen: 2.2, arrowFlare: 1.9 };
 
 export function buildModel(R: Analysis, opts: ModelOptions = {}): Model {
   const D = R.D, planes: Plane[] = R.spec.dom().F.map((f) => ({ n: f.n, d: f.d }));

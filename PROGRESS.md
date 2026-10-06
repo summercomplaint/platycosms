@@ -18,16 +18,30 @@ Style follows Greg Egan's "Loops Across Space" coloured-cylinder figure. Math so
 
 ## Phases
 - [x] 0. Repo scaffold, legacy backup, docs
-- [x] 1. TypeScript project, port math/mesh/data, tests green (43 tests)
+- [x] 1. TypeScript project, port math/mesh/data, tests green
 - [x] 2. Seams (Egan's extra edge) + real Euler check (V-E+F-1=0 for all 10)
-- [ ] 3. Facts + NOTES.md (+ subagent check against the PDF)
-- [ ] 4. Restyle + UI built from facts
-- [ ] 5. Inside view + crab
-- [ ] 6. Symmetry animation
-- [ ] 7. CI, README, final push
+- [x] 3. Facts + NOTES.md, verified against the PDF by a fresh subagent (no discrepancies)
+- [x] 4. Restyle (translucent tubes, solid same-colour arrows, narrow tubes) + panel built from facts
+- [x] 5. Inside view + fiddler crab
+- [x] 6. Symmetry animation (3 generators; ghost copy outside, whole tiling inside)
+- [~] 7. CI, README, final push (CI workflow written; check its first run on GitHub)
 
 ## Log
 - v1 (Artifact) and v2 (standalone HTML, CPU-clipped closed meshes) done before this repo existed; see `legacy/`.
-- Phase 1+2 done: `src/math/*` (analysis incl. seams via closure of skeleton images, regions = sub-faces), `src/render/mesh.ts`, `src/data/platycosms.ts`, tests in `tests/`.
+- Phase 1+2: `src/math/*` (analysis incl. seams via closure of skeleton images, regions = sub-faces), `src/render/mesh.ts`, `src/data/platycosms.ts`, tests in `tests/`.
   Class counts (V,E,F): c1 1,3,3; c2 1,3,3; c3 2,5,4; c4 1,3,3; c6 2,5,4; c22 2,5,4 (2 seams); +a1 1,3,3; -a1 2,5,4; +a2 2,5,4; -a2 2,6,5.
   Note: c22 has 5 edge classes here, not Egan's 6 (different but valid cell structure).
+- Phases 3-6: app in `src/main.ts`, `src/ui/panel.ts`, `src/render/{stage,cellKit,tiles,firstPerson,animation,crab,mesh,iso3d}.ts`.
+  Hash routes: `#c22`, `#c22/inside`, `#c22/outside/anim2@0.5` (symmetry 2 paused half way). `?stopAfter=3` stops the render loop (used for headless screenshots).
+- Headless screenshots (Windows): run `npx vite preview --port 4173`, then `scripts/shots.sh <outdir> name=#hash ...` (needs Edge). The inside view is slow under software GL (about 1M triangles); use `FRAMES=2 BUDGET=20000`.
+- `npm run build:single` makes `dist-single/index.html` (3 MB, crab and textures inlined). Checked: it works from file://.
+- Gotcha: `renderer.setSize` clears the canvas, so `Stage.resize` redraws immediately.
+- Gotcha: never put backticks inside a double-quoted `node -e "..."` in bash; edit files with the editor tools instead.
+
+## Ideas not done yet
+- Fibre slice slider for mapping tori (show the torus / Klein bottle fibre at height z).
+- Seams could be drawn in a distinct style; the face list could say which sub-faces are halves.
+- Touch controls for the inside view (look works by drag; there is no on-screen move pad).
+- A decimated crab for weaker GPUs (the inside view draws about 20 crabs, around 1M triangles in all).
+- Diameters and injectivity radii are shown as formulas only.
+- Domains for +a2 and -a2 have faces glued to themselves in halves (shown as "front (its halves)"); a different domain might read better.
