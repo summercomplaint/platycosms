@@ -1,0 +1,13 @@
+node_modules/
+dist/
+dist-single/
+*.log
+.vite/
+coverage/
+# working scratch while porting the v1 JS (delete when the port is done)
+legacy/src/
+# Reference material we do not redistribute. See NOTES.md for links.
+Describing_the_platycosms.pdf
+Loops Across Space*
+Hantzsche–Wendt_construction.svg.webp
+desktop.ini
