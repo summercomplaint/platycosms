@@ -18,8 +18,8 @@ Style follows Greg Egan's "Loops Across Space" coloured-cylinder figure. Math so
 
 ## Phases
 - [x] 0. Repo scaffold, legacy backup, docs
-- [ ] 1. TypeScript project, port math/mesh/data, tests green
-- [ ] 2. Seams (Egan's extra edge) + real Euler check
+- [x] 1. TypeScript project, port math/mesh/data, tests green (43 tests)
+- [x] 2. Seams (Egan's extra edge) + real Euler check (V-E+F-1=0 for all 10)
 - [ ] 3. Facts + NOTES.md (+ subagent check against the PDF)
 - [ ] 4. Restyle + UI built from facts
 - [ ] 5. Inside view + crab
@@ -28,3 +28,6 @@ Style follows Greg Egan's "Loops Across Space" coloured-cylinder figure. Math so
 
 ## Log
 - v1 (Artifact) and v2 (standalone HTML, CPU-clipped closed meshes) done before this repo existed; see `legacy/`.
+- Phase 1+2 done: `src/math/*` (analysis incl. seams via closure of skeleton images, regions = sub-faces), `src/render/mesh.ts`, `src/data/platycosms.ts`, tests in `tests/`.
+  Class counts (V,E,F): c1 1,3,3; c2 1,3,3; c3 2,5,4; c4 1,3,3; c6 2,5,4; c22 2,5,4 (2 seams); +a1 1,3,3; -a1 2,5,4; +a2 2,5,4; -a2 2,6,5.
+  Note: c22 has 5 edge classes here, not Egan's 6 (different but valid cell structure).
