@@ -3,7 +3,7 @@ import { content } from '../content';
 import { describeIso } from '../math/gluing';
 import type { Stage } from '../render/stage';
 import type { Mode } from '../render/stage';
-import { inline, paragraphs } from './markdown';
+import { paragraphs } from './markdown';
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const wiki = (label: string, article: string) =>
@@ -30,7 +30,6 @@ export function renderPanel(el: HTMLElement, stage: Stage, mode: Mode): void {
   el.innerHTML = `
     <div class="title">
       <h2>${def.name} <span class="sym">${def.sym}</span></h2>
-      <p class="fam">${inline(content.tagline(def.id))}</p>
     </div>
     <div class="story">${paragraphs(content.description(def.id))}</div>
     <section class="key">

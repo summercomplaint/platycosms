@@ -5,8 +5,7 @@ import { inline, paragraphs } from '../src/ui/markdown';
 
 describe('page text in content/', () => {
   for (const P of PLATYCOSMS) {
-    it(`${P.id} has a tagline and a description`, () => {
-      expect(content.tagline(P.id).trim().length).toBeGreaterThan(10);
+    it(`${P.id} has a description`, () => {
       expect(content.description(P.id).trim().length).toBeGreaterThan(50);
     });
   }

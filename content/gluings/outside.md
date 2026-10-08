@@ -1,1 +1,2 @@
-Press one to watch a copy of the cell move by that map. It lands against the face it is glued to, and colours and arrows match across it. Together these maps generate every way of moving the cell onto another copy of itself.
+Each face is glued to another by a rigid motion of 3-dimensional space. Click a transformation to apply it to a copy of the cell and see how it glues two faces
+

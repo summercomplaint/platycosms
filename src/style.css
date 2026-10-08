@@ -97,7 +97,6 @@ canvas:active { cursor: grabbing; }
 .panel h2 { font-weight: 700; font-size: 1.7rem; margin: 0; line-height: 1.1; letter-spacing: -0.01em; }
 .panel h2 .sym { font-family: var(--font-mono); font-weight: 500; font-size: 1.1rem; color: var(--accent); margin-left: 6px; }
 .title { display: grid; gap: 4px; }
-.fam { font-size: .9rem; }
 .story { display: grid; gap: 10px; font-size: .95rem; }
 .key { display: grid; gap: 10px; border-top: 1px solid var(--line); padding-top: 14px; }
 .key h3, summary { margin: 0; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
@@ -113,8 +112,8 @@ canvas:active { cursor: grabbing; }
 .pairs .k { font-size: .84rem; }
 
 
-.story a, .intro a, .fam a, dt a { color: inherit; text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
-.story a:hover, .intro a:hover, .fam a:hover, dt a:hover { color: var(--accent); }
+.story a, .intro a, dt a { color: inherit; text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
+.story a:hover, .intro a:hover, dt a:hover { color: var(--accent); }
 dl { display: grid; grid-template-columns: auto 1fr; gap: 5px 16px; margin: 0; font-size: .9rem; }
 dt { font-weight: 700; }
 dd { margin: 0; overflow-wrap: anywhere; }

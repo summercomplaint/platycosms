@@ -10,6 +10,5 @@ const get = (path: string): string => {
 export const content = {
   intro: (): string[] => Object.keys(files).filter((k) => k.startsWith('../content/intro/')).sort().map((k) => files[k]),
   gluings: (mode: 'outside' | 'inside'): string => get(`gluings/${mode}.md`),
-  tagline: (id: string): string => get(`platycosms/${id}/tagline.md`),
   description: (id: string): string => get(`platycosms/${id}/description.md`),
 };

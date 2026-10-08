@@ -1,1 +1,2 @@
-Press one to watch every copy of the cell move by that map. The whole tiling lands on itself, each crab where another one was. Together these maps generate every way of moving the cell onto another copy of itself.
+Click a transformation to see it applied to the cells around you, shifting you from one cell to a neighboring cell by a rigid motion of 3 dimensional space
+

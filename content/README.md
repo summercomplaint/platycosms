@@ -16,7 +16,6 @@ Every piece of prose on the page lives in this folder, one small file per piece.
 | `intro/2-how-to-read.md` | top of the page, right |
 | `gluings/outside.md` | above the list of gluings, outside view |
 | `gluings/inside.md` | above the list of gluings, inside view |
-| `platycosms/<id>/tagline.md` | one line under the name (family, other names) |
 | `platycosms/<id>/description.md` | the main description of that space |
 
 The ids are `c1 c2 c3 c4 c6 c22 a1p a1m a2p a2m` (`a1p` is +a1, `a1m` is −a1, and so on).
