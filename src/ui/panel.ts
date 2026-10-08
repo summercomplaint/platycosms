@@ -37,8 +37,8 @@ export function renderPanel(el: HTMLElement, stage: Stage, mode: Mode): void {
       <div class="small">${paragraphs(content.gluings(mode))}</div>
       <ul class="pairs">${pairHtml}</ul>
     </section>
-    <details>
-      <summary>More details</summary>
+    <section class="key details">
+      <h3>More details</h3>
       <dl>
         ${row(wiki('Orientable', 'Orientability'), `${def.orientable ? 'Yes' : 'No'}${F.metachiral ? ', in two mirror-image forms' : ''}${F.orientableDoubleCover ? `. Orientable double cover: ${F.orientableDoubleCover.replace(/(c\d+)$/, '<a href="#$1">$1</a>')}` : ''}`)}
         ${row(wiki('Mapping torus', 'Mapping_torus'), esc(F.mappingTorus.text))}
@@ -56,7 +56,7 @@ export function renderPanel(el: HTMLElement, stage: Stage, mode: Mode): void {
         ${row(`${wiki('Diameter', 'Diameter')}²`, esc(F.diameterSq))}
       </dl>
       <p class="small">A, B, C, D are the shape parameters of Conway and Rossetti's paper, where the rest of these come from. Every fact is sourced in NOTES.md in the repository.</p>
-    </details>`;
+    </section>`;
 
   // the gluing buttons: hover highlights the faces, a click plays the map from the start
   const btns = [...el.querySelectorAll<HTMLButtonElement>('[data-pair]')];

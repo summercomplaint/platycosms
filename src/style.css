@@ -55,7 +55,7 @@ nav button .sym { font-family: var(--font-mono); font-weight: 500; font-size: 1r
 nav button .nm { font-size: .78rem; }
 nav button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
 nav button[aria-selected="true"] .sym { color: var(--accent-fg); }
-button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 main { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 16px; align-items: start; }
 .stage { position: relative; background: var(--stage); border: 1px solid var(--line); border-radius: 10px; height: clamp(440px, calc(100vh - 200px), 820px); overflow: hidden; }
@@ -99,7 +99,7 @@ canvas:active { cursor: grabbing; }
 .title { display: grid; gap: 4px; }
 .story { display: grid; gap: 10px; font-size: .95rem; }
 .key { display: grid; gap: 10px; border-top: 1px solid var(--line); padding-top: 14px; }
-.key h3, summary { margin: 0; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+.key h3 { margin: 0; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
 .key > p { font-size: .9rem; }
 .small { font-size: .84rem; }
 
@@ -117,10 +117,6 @@ canvas:active { cursor: grabbing; }
 dl { display: grid; grid-template-columns: auto 1fr; gap: 5px 16px; margin: 0; font-size: .9rem; }
 dt { font-weight: 700; }
 dd { margin: 0; overflow-wrap: anywhere; }
-details dd { font-family: var(--font-mono); font-size: .8rem; }
-details { border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 10px; }
-summary { cursor: pointer; }
-details[open] summary { margin-bottom: 10px; }
-details > p, details > dl { margin-bottom: 10px; }
+.details dd { font-size: .88rem; }
 footer { font-size: .84rem; max-width: 120ch; }
 @media (max-width: 960px) { main { grid-template-columns: minmax(0, 1fr); } .stage { height: 64vh; } .panel { max-height: none; } }
