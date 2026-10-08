@@ -44,12 +44,17 @@ export interface Facts {
   diameterSq: string;
   /** a plain-language statement of the mapping-torus structure, generated from the computed fibrations and checked in tests */
   mappingTorus: { is: boolean; text: string };
+  /**
+   * The page's description: how the faces are glued and how to picture the space (the mapping torus picture where
+   * there is one). Paragraphs; restates facts above and the computed face pairings (source 'derived', see NOTES.md).
+   */
+  story: string[];
   sources: Record<string, Source>;
 }
 
 const src = (o: Partial<Record<keyof Facts, Source>> & Record<string, Source>) => o as Record<string, Source>;
 
-export const FACTS: Facts[] = [
+const BASE: Omit<Facts, 'story'>[] = [
   {
     id: 'c1', family: 'torocosm', otherNames: ['3-torus'], wolf: 'G1', spaceGroup: 'P1 (no. 1)',
     pointGroup: '1', holonomyOrder: 1, shapeParameters: 6, h1: 'ℤ³', b1: 3,
@@ -156,13 +161,70 @@ export const FACTS: Facts[] = [
   },
 ];
 
+/*
+ * The descriptions on the page. "Slice" pictures: cutting the cell by planes perpendicular to one direction gives
+ * tori (or Klein bottles); going once along that direction and back to the start maps the slice onto itself, so the
+ * space is the mapping torus of that map. This is the clearest way in, so the text leads with it.
+ */
+const SCREW_INTRO = 'Every horizontal slice of the cell, with its sides glued, is a flat torus. Moving up through the cell sweeps that torus once around a circle';
+const MIRROR_CRAB = 'A crab that goes through comes back reflected: the mirror-image crab, with its big claw on the other side and the R on its back reading backwards. So there is no consistent left and right in this space; it is non-orientable.';
+const STORY: Record<string, string[]> = {
+  c1: [
+    'Each face of the cube is glued straight across to the opposite face, like a video game screen that wraps around, but in all three directions. Leave through the right face and you come back in through the left, unchanged.',
+    'This is the 3-torus. Every slice is a torus, and going up through the cell brings it back exactly as it was: the torus times a circle, the mapping torus of doing nothing.',
+  ],
+  c2: [
+    'The side faces are glued straight across, as in the torocosm, but the top is glued to the bottom after a half turn. A crab that climbs out through the top comes back in through the bottom facing the other way.',
+    `${SCREW_INTRO}, and when it gets back it has been given a half turn. So the dicosm is the mapping torus of a half turn of the torus.`,
+  ],
+  c3: [
+    'The cell is a hexagonal prism. Opposite side faces are glued straight across; the top is glued to the bottom after a one-third turn.',
+    'A hexagon with its opposite sides glued is a flat torus, so every horizontal slice of the cell is one. Moving up through the cell sweeps that torus once around a circle, and it comes back turned by a third. So the tricosm is the mapping torus of a one-third turn.',
+    'Only half, third, quarter and sixth turns carry a flat torus onto itself, so there are exactly five spaces built like this: c1, c2, c3, c4 and c6. The turn can go either way, and the two choices are mirror images of each other.',
+  ],
+  c4: [
+    'Opposite side faces are glued straight across; the top is glued to the bottom after a quarter turn.',
+    `${SCREW_INTRO}, and it comes back turned by a quarter. So the tetracosm is the mapping torus of a quarter turn. Turning the other way gives its mirror image.`,
+  ],
+  c6: [
+    'The cell is a hexagonal prism. Opposite side faces are glued straight across; the top is glued to the bottom after a one-sixth turn.',
+    `${SCREW_INTRO}, and it comes back turned by a sixth. So the hexacosm is the mapping torus of a one-sixth turn. Turning the other way gives its mirror image.`,
+  ],
+  c22: [
+    'The odd one out. The left and right faces are glued straight across, but the other two pairs are glued by half-turn screws about lines in two perpendicular directions. The top and bottom are each cut in half by an extra edge, because each half is glued by a different screw.',
+    'It is the one platycosm that is not a mapping torus: its first homology group is finite, so there is no way to map it onto a circle and look at the slices.',
+  ],
+  a1p: [
+    'Like the torocosm, except that the left face is glued to the right after a mirror flip, top to bottom. The front and back, and the top and bottom, are glued straight across.',
+    MIRROR_CRAB,
+    'The slices across the left–right direction are tori, and going once across brings the torus back reflected: this is the mapping torus of a reflection. It is also the Klein bottle times a circle.',
+  ],
+  a1m: [
+    'As in the first amphicosm, the left face is glued to the right after a mirror flip. The difference is that the front face is glued to the back in two halves, each shifted half way up or down, so it is not a product with a circle.',
+    MIRROR_CRAB,
+    'It is again the mapping torus of a reflection of the torus, but of the other kind of reflection: one that swaps the torus\'s two generating loops instead of fixing each of them.',
+  ],
+  a2p: [
+    'The left and right faces are glued straight across. The front face is glued to itself: each half to the other half, by a mirror flip with a slide. The back face is glued to itself in the same way, and the top to the bottom by a mirror flip with a slide.',
+    MIRROR_CRAB,
+    'Its slices are Klein bottles rather than tori: it is the mapping torus of a symmetry of the Klein bottle, a twisted one, so it is not the Klein bottle times a circle.',
+  ],
+  a2m: [
+    'As in the first amphidicosm, the front and back faces are each glued to themselves by mirror flips with slides. The difference is the top and bottom: they are glued by half-turn screws, in two halves, as in the didicosm.',
+    MIRROR_CRAB,
+    'Its slices are Klein bottles: it is the mapping torus of a twisted symmetry of the Klein bottle.',
+  ],
+};
+
+export const FACTS: Facts[] = BASE.map((f) => ({ ...f, story: STORY[f.id] }));
+
 export const factsFor = (id: string): Facts => FACTS.find((f) => f.id === id)!;
 
 /** Names of the families, for the UI */
 export const FAMILY_LABEL: Record<Facts['family'], string> = {
-  torocosm: 'the 3-torus',
-  helicosm: 'helicosm (a screw motion with a rotation of order N)',
-  didicosm: 'didicosm (three perpendicular half-turn screws)',
-  amphicosm: 'amphicosm (a glide reflection; non-orientable)',
-  amphidicosm: 'amphidicosm (glide reflections, point group of order 4; non-orientable)',
+  torocosm: 'The torocosm: translations only',
+  helicosm: 'A helicosm: translations plus one screw motion',
+  didicosm: 'The didicosm: half-turn screws in three perpendicular directions',
+  amphicosm: 'An amphicosm: translations plus a glide reflection',
+  amphidicosm: 'An amphidicosm: glide reflections, holonomy of order 4',
 };

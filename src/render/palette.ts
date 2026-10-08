@@ -1,5 +1,8 @@
-/** Edge-class colours (Egan's red, cyan, magenta, yellow, blue, green, then more) and vertex-class colours. */
-export const EDGE_COL = ['#e11d1d', '#00bfd0', '#d112d1', '#f0c400', '#1f3fd1', '#18b53a', '#f27a00', '#7a3fd1', '#8a5a2b', '#ff8fb3'];
-export const VERT_COL = ['#0c0d10', '#ffffff', '#8b919c', '#c9a227'];
+/**
+ * Edge-class colours (Egan's red, cyan, magenta, yellow, blue, green, then more), brightened to read on a black sky,
+ * and vertex-class colours (at most two vertex classes occur, so white and orange; never black on black).
+ */
+export const EDGE_COL = ['#ff2d2d', '#00e0f0', '#ff3dff', '#ffd60a', '#3d7bff', '#22e04a', '#ff8a00', '#a066ff', '#c98a4b', '#ff9ec4'];
+export const VERT_COL = ['#ffffff', '#ff8a00', '#ff9ec4', '#c98a4b'];
 export const edgeColor = (cls: number) => EDGE_COL[cls % EDGE_COL.length];
 export const vertColor = (cls: number) => VERT_COL[cls % VERT_COL.length];

@@ -33,14 +33,14 @@ export function buildKit(R: Analysis, opts: KitOptions): CellKit {
     const geometry = new BufferGeometry();
     geometry.setAttribute('position', new BufferAttribute(g.pos, 3));
     geometry.setAttribute('normal', new BufferAttribute(g.nrm, 3));
+    // solid, bright plastic; the arrowhead is a lighter tint of its tube so it stands out where it flares out
     let material: Material;
     if (g.kind === 'tube') {
-      // translucent, so the arrow inside shows through
-      material = new MeshStandardMaterial({ color: new Color(edgeColor(g.cls)), roughness: 0.3, metalness: 0, transparent: true, opacity: 0.42, depthWrite: false });
+      material = new MeshStandardMaterial({ color: new Color(edgeColor(g.cls)), roughness: 0.35, metalness: 0 });
     } else if (g.kind === 'arrow') {
-      material = new MeshStandardMaterial({ color: new Color(edgeColor(g.cls)), roughness: 0.45, metalness: 0.02 });
+      material = new MeshStandardMaterial({ color: new Color(edgeColor(g.cls)).lerp(new Color('#ffffff'), 0.32), roughness: 0.35, metalness: 0 });
     } else {
-      material = new MeshStandardMaterial({ color: new Color(vertColor(g.cls)), roughness: 0.4, metalness: 0.04 });
+      material = new MeshStandardMaterial({ color: new Color(vertColor(g.cls)), roughness: 0.3, metalness: 0 });
     }
     parts.push({ kind: g.kind, geometry, material, local: I });
   }
@@ -51,7 +51,7 @@ export function buildKit(R: Analysis, opts: KitOptions): CellKit {
   const inradius = Math.min(...D.F.map((f) => f.d - (f.n[0] * centroid[0] + f.n[1] * centroid[1] + f.n[2] * centroid[2])));
   if (opts.crab) {
     // one crab at the centre of the cell, scaled to fit well inside the largest ball in the cell
-    const k = inradius * 0.78;
+    const k = inradius * 0.5;
     const local = new Matrix4().makeTranslation(centroid[0], centroid[1], centroid[2]).multiply(new Matrix4().makeScale(k, k, k));
     for (const p of opts.crab.parts) parts.push({ kind: 'crab', geometry: p.geometry, material: p.material, local });
   }

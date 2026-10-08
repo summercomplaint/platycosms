@@ -1,5 +1,5 @@
 import type { Analysis } from './analyze';
-import { Iso, apply, det, inverse, isTranslation, rotationAngle, screwOf } from './iso';
+import { Iso, apply, det, inverse, isTranslation, key as isoKey, rotationAngle, screwOf } from './iso';
 import { Vec3, mean } from './vec';
 
 /** Plain names for the faces of the domain: left/right (x), front/back (y), bottom/top (z), otherwise "side k". */
@@ -28,23 +28,32 @@ export function num(x: number): string {
   const sign = x < 0 ? '-' : '', a = Math.abs(x);
   if (Math.abs(a - Math.round(a)) < 1e-6) return sign + Math.round(a);
   if (Math.abs(a * 2 - Math.round(a * 2)) < 1e-6) { const w = Math.floor(a); return sign + (w ? w : '') + '½'; }
+  if (Math.abs(a * 4 - Math.round(a * 4)) < 1e-6) { const w = Math.floor(a); return sign + (w ? w : '') + (a - w < 0.5 ? '¼' : '¾'); }
   if (Math.abs(a - Math.sqrt(3) / 2) < 1e-6) return sign + '√3/2';
   return sign + a.toFixed(2);
 }
 const vec = (v: Vec3) => '(' + v.map(num).join(', ') + ')';
 
-/** A short human description of a generator, for the animation buttons. */
+/** A short description of an isometry, naming its axis line or mirror plane (for the gluing list). */
 export function describeIso(g: Iso): string {
-  if (isTranslation(g)) return 'translation by ' + vec(g.t);
+  if (isTranslation(g)) return 'slide by ' + vec(g.t);
   if (det(g) > 0) {
     const s = screwOf(g);
     const turn = TURN_NAME[Math.round(s.angle)] ?? Math.round(s.angle) + '° turn';
-    return turn + ' about the ' + axisName(s.axis) + ' axis direction, sliding ' + num(Math.abs(s.slide));
+    const i = s.axis.findIndex((x) => Math.abs(Math.abs(x) - 1) < 1e-6);
+    if (i < 0) return turn + ' about the direction ' + axisName(s.axis) + ', sliding ' + num(Math.abs(s.slide));
+    const others = [0, 1, 2].filter((j) => j !== i);
+    const line = others.every((j) => Math.abs(s.point[j]) < 1e-9)
+      ? 'the ' + 'xyz'[i] + '-axis'
+      : 'the line ' + others.map((j) => 'xyz'[j] + ' = ' + num(s.point[j])).join(', ');
+    return turn + ' about ' + line + ', sliding ' + num(Math.abs(s.slide)) + ' along ' + 'xyz'[i];
   }
-  // glide reflection: A = I - 2 m m^T; the mirror normal is the axis with -1 on the diagonal (axis-aligned in our groups)
+  // glide reflection x_m -> -x_m + t_m (axis-aligned in our groups): mirror in the plane x_m = t_m / 2, then slide
   const m = [0, 1, 2].find((i) => g.A[4 * i] < 0)!;
   const u = g.t.map((x, i) => (i === m ? 0 : x)) as Vec3;
-  return 'mirror flip (' + 'xyz'[m] + ' → −' + 'xyz'[m] + ') plus a slide by ' + vec(u);
+  const along = [0, 1, 2].filter((i) => Math.abs(u[i]) > 1e-9);
+  const slide = along.length === 1 ? num(Math.abs(u[along[0]])) + ' along ' + 'xyz'[along[0]] : 'by ' + vec(u);
+  return 'mirror in the plane ' + 'xyz'[m] + ' = ' + num(g.t[m] / 2) + ', then slide ' + slide;
 }
 
 /** A pairing of two sub-faces of the domain: every polygon of `a` is glued whole to a polygon of `b`. */
@@ -55,6 +64,8 @@ export interface Pairing {
   /** polygons on both sides (the part of face a, and the matching part of face b) */
   polys: { face: number; poly: Vec3[] }[];
   count: number;
+  /** maps the face-a part onto face b, so gamma(cell) is the neighbouring copy across face b */
+  gamma: Iso;
 }
 
 export function pairings(R: Analysis): Pairing[] {
@@ -67,8 +78,9 @@ export function pairings(R: Analysis): Pairing[] {
     if (r.f > r.g) continue;
     if (r.f === r.g && (ca[0] - cb[0] || ca[1] - cb[1] || ca[2] - cb[2]) > 1e-9) continue;
     const kind = kindOf(r.gamma);
-    const key = `${r.f}-${r.g}-${kind}`;
-    if (!out.has(key)) out.set(key, { kind, a: { face: r.f, name: faceName(F[r.f].n, r.f) }, b: { face: r.g, name: faceName(F[r.g].n, r.g) }, polys: [], count: 0 });
+    // one entry per gluing map: halves of a face glued by different maps are listed (and animated) separately
+    const key = `${r.f}-${r.g}-${isoKey(r.gamma)}`;
+    if (!out.has(key)) out.set(key, { kind, a: { face: r.f, name: faceName(F[r.f].n, r.f) }, b: { face: r.g, name: faceName(F[r.g].n, r.g) }, polys: [], count: 0, gamma: inverse(r.gamma) });
     const p = out.get(key)!;
     p.polys.push({ face: r.f, poly: r.poly }, { face: r.g, poly: other });
     p.count++;

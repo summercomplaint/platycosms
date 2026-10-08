@@ -1,20 +1,18 @@
-/** A small timeline for the symmetry animation: wait, move 0 -> 1, hold, repeat. */
+/** A small timeline for the gluing animation: a short wait, then move 0 -> 1 and stop there. */
 export class Animator {
-  /** which generator (0..2) is playing, or null */
+  /** which face pairing is playing, or null */
   gen: number | null = null;
   /** progress 0..1 (before easing) */
   tau = 0;
   playing = false;
-  private phase: 'start' | 'run' | 'end' = 'start';
   private wait = 0;
-  readonly duration = 3.2;
+  readonly duration = 2.6;
 
   start(gen: number): void {
     this.gen = gen;
     this.tau = 0;
     this.playing = true;
-    this.phase = 'start';
-    this.wait = 0.5;
+    this.wait = 0.3;
   }
   stop(): void {
     this.gen = null;
@@ -22,10 +20,12 @@ export class Animator {
     this.playing = false;
   }
   pause(): void { this.playing = false; }
+  /** carry on; from the end, play again from the start */
   resume(): void {
     if (this.gen === null) return;
+    if (this.tau >= 1) { this.start(this.gen); return; }
     this.playing = true;
-    if (this.tau >= 1) { this.tau = 0; this.phase = 'start'; this.wait = 0.4; } else this.phase = 'run';
+    this.wait = 0;
   }
   scrub(t: number): void {
     this.tau = Math.max(0, Math.min(1, t));
@@ -36,13 +36,8 @@ export class Animator {
 
   tick(dt: number): void {
     if (!this.playing || this.gen === null) return;
-    if (this.phase === 'start') { this.wait -= dt; if (this.wait <= 0) this.phase = 'run'; return; }
-    if (this.phase === 'run') {
-      this.tau += dt / this.duration;
-      if (this.tau >= 1) { this.tau = 1; this.phase = 'end'; this.wait = 1.1; }
-      return;
-    }
-    this.wait -= dt;
-    if (this.wait <= 0) { this.tau = 0; this.phase = 'start'; this.wait = 0.5; }
+    if (this.wait > 0) { this.wait -= dt; return; }
+    this.tau += dt / this.duration;
+    if (this.tau >= 1) { this.tau = 1; this.playing = false; }
   }
 }

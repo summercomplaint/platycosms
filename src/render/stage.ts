@@ -1,6 +1,7 @@
 import {
-  AmbientLight, BufferGeometry, Color, DirectionalLight, DoubleSide, Float32BufferAttribute, Fog, Group, HemisphereLight, LineBasicMaterial,
-  LineSegments, Material, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, PerspectiveCamera, Scene, Vector3, WebGLRenderer,
+  AdditiveBlending, AmbientLight, BufferGeometry, Color, DirectionalLight, DoubleSide, Float32BufferAttribute, Fog, Group, HemisphereLight,
+  LineBasicMaterial, LineSegments, Material, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, PerspectiveCamera, Points,
+  PointsMaterial, Scene, Vector3, WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { analyze, Analysis } from '../math/analyze';
@@ -16,7 +17,7 @@ import { isoPath, toMatrix4 } from './iso3d';
 import { TileField } from './tiles';
 
 export type Mode = 'outside' | 'inside';
-export interface Options { arrows: boolean; faces: boolean; crab: boolean; edges: boolean; spin: boolean }
+export interface Options { crab: boolean }
 
 interface Entry {
   def: PlatycosmDef;
@@ -28,15 +29,16 @@ interface Entry {
   kitLow?: CellKit;
 }
 
-const css = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const SPACE = new Color('#000000');
+const ACCENT = new Color('#3dff7a');
 
 /** Owns the renderer, the scene and both views (outside the cell, and inside among its copies). */
 export class Stage {
   readonly anim = new Animator();
-  options: Options = { arrows: true, faces: true, crab: true, edges: true, spin: false };
+  options: Options = { crab: true };
   mode: Mode = 'outside';
   onFrame: (() => void) | null = null;
-  /** called when the cache has analysed a platycosm (so the UI can show its facts) */
+  /** the platycosm on show (so the UI can show its facts) */
   entry: Entry | null = null;
 
   private renderer: WebGLRenderer;
@@ -46,23 +48,20 @@ export class Stage {
   private fp: FirstPerson;
   private cache = new Map<string, Entry>();
   private crab: CrabModel | null = null;
+  private stars = makeStars();
 
   // outside view
   private outside: Group | null = null;
-  private arrowGroup = new Group();
   private crabGroup = new Group();
-  private faceGroup = new Group();
-  private faceMats: MeshBasicMaterial[] = [];
   private highlightGroup = new Group();
+  private hoverPolys: { poly: Vec3[] }[] | null = null;
+  private shownHighlight: unknown = undefined;
   private ghost: Group | null = null;
   // inside view
   private tiles: TileField | null = null;
   private lastTilePos = new Vector3(Infinity, 0, 0);
   private tilesDirty = true;
 
-  private stageColor = new Color('#e9edf3');
-  private faceColor = new Color('#6c7a93');
-  private hlColor = new Color('#2a55d6');
   private last = performance.now();
   /** ?stopAfter=N stops the render loop after N frames once the crab has loaded (for headless screenshots) */
   private stopAfter = Number(new URLSearchParams(location.search).get('stopAfter') ?? 0);
@@ -75,19 +74,19 @@ export class Stage {
     this.orbit = new OrbitControls(this.camera, canvas);
     this.orbit.enableDamping = true;
     this.orbit.dampingFactor = 0.12;
-    this.orbit.autoRotateSpeed = 1.6;
     this.fp = new FirstPerson(this.camera, canvas);
-    this.scene.add(new HemisphereLight(0xffffff, 0x8a93a6, 0.95));
-    const sun = new DirectionalLight(0xffffff, 0.9);
+    // bright, even light so the colours stay saturated against the black
+    this.scene.add(new HemisphereLight(0xffffff, 0x5a6478, 1.6));
+    const sun = new DirectionalLight(0xffffff, 1.5);
     sun.position.set(3, -4, 5);
     this.scene.add(sun);
-    const fill = new DirectionalLight(0xffffff, 0.35);
+    const fill = new DirectionalLight(0xffffff, 0.7);
     fill.position.set(-4, 2, -2);
     this.scene.add(fill);
-    this.scene.add(new AmbientLight(0xffffff, 0.15));
+    this.scene.add(new AmbientLight(0xffffff, 0.35));
+    this.scene.background = SPACE;
     new ResizeObserver(() => this.resize()).observe(canvas.parentElement ?? canvas);
     this.resize();
-    this.refreshTheme();
     requestAnimationFrame(() => this.frame());
     loadCrab().then((c) => { this.crab = c; this.cache.clear(); if (this.entry) this.show(this.entry.def); }, (e) => console.warn('crab failed to load', e));
   }
@@ -97,7 +96,7 @@ export class Stage {
     const keep = this.entry && this.entry.def.id === def.id;
     const e = this.entryFor(def);
     this.entry = e;
-    if (!keep) this.anim.stop();
+    if (!keep) { this.anim.stop(); this.hoverPolys = null; }
     this.rebuild();
     return e;
   }
@@ -109,52 +108,27 @@ export class Stage {
   }
 
   applyOptions(): void {
-    this.orbit.autoRotate = this.options.spin && this.mode === 'outside';
-    if (this.outside) {
-      this.arrowGroup.visible = this.options.arrows;
-      this.crabGroup.visible = this.options.crab;
-      this.faceGroup.visible = this.options.faces;
-    }
+    if (this.outside) this.crabGroup.visible = this.options.crab;
     this.tilesDirty = true;
   }
 
+  /** highlight some face polygons (hovering a gluing in the list); null clears it */
   highlight(polys: { poly: Vec3[] }[] | null): void {
-    this.highlightGroup.clear();
-    if (!polys || this.mode !== 'outside') return;
-    const mat = new MeshBasicMaterial({ color: this.hlColor, transparent: true, opacity: 0.5, side: DoubleSide, depthWrite: false });
-    for (const { poly } of polys) {
-      const pos: number[] = [];
-      for (let i = 1; i < poly.length - 1; i++) for (const k of [0, i, i + 1]) pos.push(...poly[k]);
-      const g = new BufferGeometry();
-      g.setAttribute('position', new Float32BufferAttribute(pos, 3));
-      const m = new Mesh(g, mat);
-      m.renderOrder = 4;
-      this.highlightGroup.add(m);
-    }
-  }
-
-  refreshTheme(): void {
-    this.stageColor = new Color(css('--stage') || '#e9edf3');
-    this.faceColor = new Color(css('--face') || '#6c7a93');
-    this.hlColor = new Color(css('--hl') || '#2a55d6');
-    for (const m of this.faceMats) m.color.copy(this.faceColor);
-    this.scene.background = this.stageColor;
-    if (this.scene.fog) (this.scene.fog as Fog).color.copy(this.stageColor);
+    this.hoverPolys = polys;
   }
 
   /** a PNG of the current view at high resolution */
   snapshot(transparent: boolean): Promise<Blob | null> {
     const w = this.canvas.clientWidth, h = this.canvas.clientHeight, pr = this.renderer.getPixelRatio();
-    const bg = this.scene.background, fog = this.scene.fog;
-    this.scene.background = transparent ? null : new Color('#ffffff');
-    if (fog) (fog as Fog).color.set('#ffffff');
+    const starsShown = this.stars.visible;
+    if (transparent) { this.scene.background = null; this.stars.visible = false; }
     this.renderer.setPixelRatio(3);
     this.renderer.setSize(w, h, false);
     this.renderer.render(this.scene, this.camera);
     return new Promise((resolve) => {
       this.canvas.toBlob((b) => {
-        this.scene.background = bg;
-        if (fog) (fog as Fog).color.copy(this.stageColor);
+        this.scene.background = SPACE;
+        this.stars.visible = starsShown;
         this.renderer.setPixelRatio(pr);
         this.renderer.setSize(w, h, false);
         resolve(b);
@@ -180,6 +154,7 @@ export class Stage {
       this.scene.remove(this.outside);
       this.outside = null;
     }
+    this.scene.remove(this.stars);
     this.ghost = null;
     if (this.tiles) {
       this.scene.remove(this.tiles.group);
@@ -201,7 +176,6 @@ export class Stage {
     const m = new Mesh(p.geometry, material);
     m.matrixAutoUpdate = false;
     m.matrix.copy(p.local);
-    m.renderOrder = p.kind === 'tube' ? 2 : 1;
     return m;
   }
 
@@ -210,63 +184,51 @@ export class Stage {
     this.fp.enabled = false;
     this.camera.fov = 30;
     this.camera.near = 0.05;
+    this.camera.far = 100;
     this.camera.updateProjectionMatrix();
     const root = new Group();
-    this.arrowGroup = new Group();
     this.crabGroup = new Group();
-    this.faceGroup = new Group();
     this.highlightGroup = new Group();
-    this.faceMats = [];
+    this.shownHighlight = undefined;
     for (const p of e.kit.parts) {
       const m = this.meshOf(p);
-      if (p.kind === 'arrow') this.arrowGroup.add(m);
-      else if (p.kind === 'crab') this.crabGroup.add(m);
+      if (p.kind === 'crab') this.crabGroup.add(m);
       else root.add(m);
     }
-    // the cell's faces (translucent, pushed back so flush caps always win) and outline
+    root.add(this.crabGroup, this.highlightGroup);
+
+    // the ghost copy used by the gluing animation: see-through, with a green outline of the cell
     const D = e.def.dom();
     const lines: number[] = [];
-    for (const f of D.F) {
-      const pos: number[] = [];
-      for (let i = 1; i < f.poly.length - 1; i++) for (const k of [0, i, i + 1]) pos.push(...D.V[f.poly[k]]);
-      const g = new BufferGeometry();
-      g.setAttribute('position', new Float32BufferAttribute(pos, 3));
-      const mat = new MeshBasicMaterial({ color: this.faceColor.clone(), transparent: true, opacity: 0.1, side: DoubleSide, depthWrite: false, polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2 });
-      this.faceMats.push(mat);
-      const m = new Mesh(g, mat);
-      m.renderOrder = 3;
-      this.faceGroup.add(m);
-      f.poly.forEach((v, i) => lines.push(...D.V[v], ...D.V[f.poly[(i + 1) % f.poly.length]]));
-    }
+    for (const f of D.F) f.poly.forEach((v, i) => lines.push(...D.V[v], ...D.V[f.poly[(i + 1) % f.poly.length]]));
     const lg = new BufferGeometry();
     lg.setAttribute('position', new Float32BufferAttribute(lines, 3));
-    const outline = new LineSegments(lg, new LineBasicMaterial({ color: this.faceColor.clone(), transparent: true, opacity: 0.5 }));
-    outline.renderOrder = 3;
-    this.faceGroup.add(outline);
-    root.add(this.arrowGroup, this.crabGroup, this.faceGroup, this.highlightGroup);
-
-    // the ghost copy used by the symmetry animation
     const ghost = new Group();
     ghost.matrixAutoUpdate = false;
     for (const p of e.kit.parts) {
       const mat = p.material.clone() as MeshStandardMaterial;
-      if (p.kind !== 'tube') { mat.transparent = true; mat.opacity = 0.78; }
-      ghost.add(this.meshOf(p, mat));
+      mat.transparent = true;
+      mat.opacity = p.kind === 'crab' ? 0.75 : 0.55;
+      mat.depthWrite = false;
+      const m = this.meshOf(p, mat);
+      m.renderOrder = 5;
+      ghost.add(m);
     }
-    const gl = new LineSegments(lg, new LineBasicMaterial({ color: this.hlColor.clone() }));
-    ghost.add(gl);
+    const outline = new LineSegments(lg, new LineBasicMaterial({ color: ACCENT }));
+    outline.renderOrder = 6;
+    ghost.add(outline);
     ghost.visible = false;
     root.add(ghost);
     this.ghost = ghost;
 
-    this.scene.add(root);
+    this.scene.add(root, this.stars);
     this.outside = root;
     // camera: look at the cell from the front-right, slightly above
     const c = v3(e.kit.centroid);
     let rad = 0;
     for (const p of D.V) rad = Math.max(rad, v3(p).distanceTo(c));
     this.orbit.target.copy(c);
-    const dist = ((rad + e.kit.r * 2) / Math.sin((this.camera.fov * Math.PI) / 360)) * 1.35;
+    const dist = ((rad + e.kit.r * 2) / Math.sin((this.camera.fov * Math.PI) / 360)) * 1.15;
     this.camera.position.copy(c).add(new Vector3(0.62, -0.74, 0.5).normalize().multiplyScalar(dist));
     this.orbit.update();
   }
@@ -282,7 +244,7 @@ export class Stage {
     this.tiles = new TileField(e.kitLow.parts, 500);
     this.scene.add(this.tiles.group);
     const R = this.tileRadius(e);
-    this.scene.fog = new Fog(this.stageColor, R * 0.45, R * 1.0);
+    this.scene.fog = new Fog(SPACE, R * 0.45, R * 1.0);
     // start halfway between the centre (where the crab is) and a corner, looking at the crab
     const D = e.def.dom(), c = v3(e.kit.centroid);
     this.fp.pos.copy(c).addScaledVector(v3(D.V[0]).sub(c), 0.55);
@@ -295,24 +257,27 @@ export class Stage {
 
   private tileRadius(e: Entry): number { return 3.3 * e.L; }
 
+  /** the path of the gluing map being animated, if any */
+  private animMatrix(e: Entry): Matrix4 | null {
+    const a = this.anim;
+    if (a.gen === null || a.tau <= 0) return null;
+    const p = e.pairs[a.gen];
+    return p ? isoPath(p.gamma)(a.eased) : null;
+  }
+
   /** recompute which copies are drawn and where (the camera moved, or the animation is running) */
   private refreshTiles(): void {
     const e = this.entry;
     if (!e || !this.tiles) return;
-    const animating = this.anim.gen !== null;
-    const R = this.tileRadius(e) + (animating ? 1.3 * e.L : 0);
+    const M = this.animMatrix(e);
+    const R = this.tileRadius(e) + (M ? 1.3 * e.L : 0);
     const c = e.kit.centroid;
     const els = e.gamma.near(c, [this.fp.pos.x, this.fp.pos.y, this.fp.pos.z], R);
-    const M = animating && this.anim.tau > 0 ? isoPath(e.def.animGens[this.anim.gen!])(this.anim.eased) : new Matrix4();
-    const mats = els.map((g) => M.clone().multiply(toMatrix4(g)));
+    const mats = els.map((g) => (M ? M.clone() : new Matrix4()).multiply(toMatrix4(g)));
     const crabR = 1.8 * e.L, cv = new Vector3(c[0], c[1], c[2]);
     const centers = mats.map((m) => cv.clone().applyMatrix4(m));
-    const { edges, crab } = this.options;
-    const { arrows } = this.options;
-    this.tiles.update(mats, (kind, i) => {
-      if (kind === 'crab') return crab && centers[i].distanceTo(this.fp.pos) < crabR;
-      return kind === 'arrow' ? edges && arrows : edges;
-    });
+    const { crab } = this.options;
+    this.tiles.update(mats, (kind, i) => (kind === 'crab' ? crab && centers[i].distanceTo(this.fp.pos) < crabR : true));
     this.lastTilePos.copy(this.fp.pos);
     this.tilesDirty = false;
   }
@@ -333,7 +298,9 @@ export class Stage {
     this.anim.tick(dt);
     if (this.mode === 'outside') {
       this.orbit.update();
+      this.stars.position.copy(this.camera.position);
       this.updateGhost();
+      this.updateHighlight();
     } else if (this.entry) {
       const moved = this.fp.update(dt);
       const far = this.fp.pos.distanceTo(this.lastTilePos) > 0.12 * this.entry.L;
@@ -349,10 +316,53 @@ export class Stage {
   private updateGhost(): void {
     const g = this.ghost, e = this.entry;
     if (!g || !e) return;
-    const a = this.anim;
-    if (a.gen === null || a.tau < 0.004) { g.visible = false; return; }
-    g.visible = true;
-    g.matrix.copy(isoPath(e.def.animGens[a.gen])(a.eased));
+    const M = this.anim.tau < 0.004 ? null : this.animMatrix(e);
+    g.visible = !!M;
+    if (!M) return;
+    g.matrix.copy(M);
     g.matrixWorldNeedsUpdate = true;
   }
+
+  /** the faces of the hovered gluing, or else of the one being animated */
+  private updateHighlight(): void {
+    const e = this.entry;
+    if (!e) return;
+    const playing = this.anim.gen !== null ? e.pairs[this.anim.gen]?.polys ?? null : null;
+    const want = this.hoverPolys ?? playing;
+    if (want === this.shownHighlight) return;
+    this.shownHighlight = want;
+    this.highlightGroup.clear();
+    if (!want) return;
+    const mat = new MeshBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.24, side: DoubleSide, depthWrite: false });
+    for (const { poly } of want) {
+      const pos: number[] = [];
+      for (let i = 1; i < poly.length - 1; i++) for (const k of [0, i, i + 1]) pos.push(...poly[k]);
+      const g = new BufferGeometry();
+      g.setAttribute('position', new Float32BufferAttribute(pos, 3));
+      const m = new Mesh(g, mat);
+      m.renderOrder = 4;
+      this.highlightGroup.add(m);
+    }
+  }
+}
+
+/** a sphere of faint stars that follows the camera (so it only turns, never comes closer) */
+function makeStars(): Points {
+  let s = 7;
+  const rnd = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
+  const pos: number[] = [], col: number[] = [];
+  for (let i = 0; i < 1800; i++) {
+    const z = 2 * rnd() - 1, t = 2 * Math.PI * rnd(), r = Math.sqrt(1 - z * z);
+    pos.push(60 * r * Math.cos(t), 60 * r * Math.sin(t), 60 * z);
+    const b = 0.35 + 0.65 * rnd() ** 3;
+    const green = rnd() < 0.12;
+    col.push(green ? 0.25 * b : b, b, green ? 0.5 * b : b);
+  }
+  const g = new BufferGeometry();
+  g.setAttribute('position', new Float32BufferAttribute(pos, 3));
+  g.setAttribute('color', new Float32BufferAttribute(col, 3));
+  const p = new Points(g, new PointsMaterial({ size: 1.6, sizeAttenuation: false, vertexColors: true, transparent: true, depthWrite: false, blending: AdditiveBlending, fog: false }));
+  p.renderOrder = -1;
+  p.frustumCulled = false;
+  return p;
 }

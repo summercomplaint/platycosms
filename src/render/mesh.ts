@@ -145,12 +145,12 @@ export interface ModelOptions {
   quality?: 'high' | 'low';
 }
 
-/** Proportions, in units of the tube radius r. Narrow tubes, short arrowheads with a wide flare. */
-export const STYLE = { ball: 1.6, arrowLen: 2.2, arrowFlare: 1.9 };
+/** Proportions, in units of the tube radius r. Long arrowheads (they read as arrows from any side), flared out of the tube. */
+export const STYLE = { ball: 1.65, arrowLen: 4.2, arrowFlare: 1.85 };
 
 export function buildModel(R: Analysis, opts: ModelOptions = {}): Model {
   const D = R.D, planes: Plane[] = R.spec.dom().F.map((f) => ({ n: f.n, d: f.d }));
-  const L = Math.cbrt(R.volume), r = (opts.radius ?? 0.05) * L, eps = 0.012 * r;
+  const L = Math.cbrt(R.volume), r = (opts.radius ?? 0.06) * L, eps = 0.012 * r;
   const seg = opts.quality === 'low' ? 12 : 32, stacks = opts.quality === 'low' ? 10 : 20, slices = opts.quality === 'low' ? 14 : 32;
   const groups = new Map<string, { kind: Kind; cls: number; pos: number[]; nrm: number[] }>();
   const pieces: Piece[] = [];
