@@ -146,10 +146,9 @@ export interface ModelOptions {
 }
 
 /**
- * Proportions, in units of the cell size L. Thin tubes; the tube stops at the arrowhead's base and starts again at its
- * tip, so the whole cone shows ("—▶—") and reads as an arrow from any side.
+ * Proportions, in units of the cell size L. Thin tubes, so most of each arrowhead stands clear of its tube.
  */
-export const STYLE = { tube: 0.03, ball: 0.07, arrowLen: 0.17, arrowFlare: 0.075, maxArrowFrac: 0.45 };
+export const STYLE = { tube: 0.02, ball: 0.07, arrowLen: 0.17, arrowFlare: 0.075, maxArrowFrac: 0.45 };
 
 export function buildModel(R: Analysis, opts: ModelOptions = {}): Model {
   const D = R.D, planes: Plane[] = R.spec.dom().F.map((f) => ({ n: f.n, d: f.d }));
@@ -169,9 +168,7 @@ export function buildModel(R: Analysis, opts: ModelOptions = {}): Model {
     const cls = R.eClass[i], pt = R.eFlip[i] ? mul(d, -1) : d;
     const h = Math.min(STYLE.arrowLen * L, STYLE.maxArrowFrac * len(sub(b, a)));
     const base = sub(mid, mul(pt, h / 2)), apex = add(mid, mul(pt, h / 2));
-    // the tube in two pieces, leaving a gap for the arrowhead (the cone's base is wider than the tube, so no hole shows)
-    emit('tube', cls, clip(cylinder(a, sub(mid, mul(d, h / 2)), r, seg), planes, eps));
-    emit('tube', cls, clip(cylinder(add(mid, mul(d, h / 2)), b, r, seg), planes, eps));
+    emit('tube', cls, clip(cylinder(a, b, r, seg), planes, eps));
     emit('arrow', cls, clip(cone(base, apex, STYLE.arrowFlare * L * (h / (STYLE.arrowLen * L)), seg), planes, 2 * eps));
   });
   D.V.forEach((p, i) => emit('ball', R.vClass[i], clip(sphere(p, STYLE.ball * L, stacks, slices), planes, 3 * eps)));

@@ -7,7 +7,7 @@ import daeUrl from '../assets/crab/model.dae?url';
 
 /**
  * The fiddler crab ("Fiddler Crab" by renceed, CC BY-NC 4.0, https://skfb.ly/6xDJv), recoloured so its handedness is
- * easy to see: a teal body, a big claw fading from teal to coral, white eyestalks, and a coral "R" on the back and the
+ * easy to see: a teal body, a big claw fading from teal to coral, white eyestalks, and a coral "P" (for platycosm) on the back and the
  * belly that reads backwards on a mirrored copy. None of these colours is an edge colour. Normalised to a unit bounding sphere centred at the origin, upright along +z, facing +y.
  */
 export interface CrabPart { geometry: BufferGeometry; material: Material }
@@ -71,8 +71,8 @@ async function load(): Promise<CrabModel> {
   }
 
   if (body) {
-    // the "R": projected straight down onto the back, and straight up onto the belly (mirrored so it reads right from below)
-    const map = letterTexture('R');
+    // the "P": projected straight down onto the back, and straight up onto the belly (mirrored so it reads right from below)
+    const map = letterTexture('P');
     const material = new MeshStandardMaterial({
       map, transparent: true, roughness: 0.5, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4,
     });
@@ -103,7 +103,7 @@ function clawGradient(g: BufferGeometry): void {
   g.setAttribute('color', new BufferAttribute(col, 3));
 }
 
-/** a coral letter with a thin dark outline on a transparent square */
+/** a coral letter on a transparent square */
 function letterTexture(ch: string): CanvasTexture {
   const c = document.createElement('canvas');
   c.width = c.height = 256;
@@ -111,10 +111,6 @@ function letterTexture(ch: string): CanvasTexture {
   g.font = '900 210px "Space Grotesk", system-ui, sans-serif';
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  g.lineJoin = 'round';
-  g.lineWidth = 12;
-  g.strokeStyle = '#062a26';
-  g.strokeText(ch, 128, 140);
   g.fillStyle = CRAB_CORAL;
   g.fillText(ch, 128, 140);
   const t = new CanvasTexture(c);

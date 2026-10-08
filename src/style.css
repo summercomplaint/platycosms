@@ -69,6 +69,25 @@ canvas:active { cursor: grabbing; }
 .tools label:hover, .tools button:hover { border-color: var(--accent); }
 .tools input { accent-color: var(--accent); margin: 0; }
 .tools .gap { flex: 1; }
+/* in the view, top left: removes the ghost (or resets the tiling) after a gluing */
+.stage .clear { position: absolute; top: 12px; left: 12px; z-index: 2; font: inherit; font-size: .85rem; font-weight: 700; background: var(--accent); color: var(--accent-fg); border: 0; border-radius: 8px; padding: 5px 14px; cursor: pointer; box-shadow: 0 0 0 3px var(--pill); }
+/* Save PNG opens a small popover above the button */
+.savewrap { position: relative; display: inline-flex; }
+.tools .pop { position: absolute; right: 0; bottom: calc(100% + 8px); display: grid; gap: 8px; min-width: 210px; padding: 10px 12px; background: var(--bg); border: 1px solid var(--accent); border-radius: 10px; pointer-events: auto; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); }
+.tools .pop label { border: 0; padding: 0; background: none; }
+.tools .pop button { justify-content: center; background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 700; }
+/* the theme switch: a round button at the top right of the page, a moon in space and a sun in daylight */
+.theme { position: fixed; top: 14px; right: 16px; z-index: 10; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--pill); color: var(--accent); cursor: pointer; display: grid; place-items: center; padding: 0; transition: border-color .2s; }
+.theme:hover { border-color: var(--accent); }
+.theme svg { grid-area: 1 / 1; width: 24px; height: 24px; transition: transform .45s cubic-bezier(.5, -.4, .3, 1.4), opacity .3s; }
+.theme .sun { fill: currentColor; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.theme .moon { fill: currentColor; }
+.theme .moon .star { fill: #fff; }
+:root[data-theme="light"] .theme .moon .star { fill: currentColor; }
+.theme .sun { opacity: 0; transform: rotate(-90deg) scale(.4); }
+:root[data-theme="light"] .theme .sun { opacity: 1; transform: none; }
+:root[data-theme="light"] .theme .moon { opacity: 0; transform: rotate(90deg) scale(.4); }
+@media (prefers-reduced-motion: reduce) { .theme svg { transition: none; } }
 .seg { pointer-events: auto; display: inline-flex; border: 1px solid var(--accent-dim); border-radius: 8px; overflow: hidden; }
 .tools .seg button { border: 0; border-radius: 0; }
 .tools .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 700; }
@@ -93,7 +112,7 @@ canvas:active { cursor: grabbing; }
 .pairs .f { font-weight: 700; font-size: .92rem; }
 .pairs .k { font-size: .84rem; }
 
-.clear { justify-self: start; font: inherit; font-size: .85rem; font-weight: 700; background: var(--accent); color: var(--accent-fg); border: 0; border-radius: 8px; padding: 5px 14px; cursor: pointer; }
+
 .story a, .intro a, .fam a, dt a { color: inherit; text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
 .story a:hover, .intro a:hover, .fam a:hover, dt a:hover { color: var(--accent); }
 dl { display: grid; grid-template-columns: auto 1fr; gap: 5px 16px; margin: 0; font-size: .9rem; }

@@ -8,6 +8,7 @@
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
+<button id="bTheme" class="theme" type="button" aria-label="Switch to light mode" title="Switch to light mode"><svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><g><line x1="12" y1="1.5" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22.5"/><line x1="1.5" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22.5" y2="12"/><line x1="4.6" y1="4.6" x2="6.4" y2="6.4"/><line x1="17.6" y1="17.6" x2="19.4" y2="19.4"/><line x1="4.6" y1="19.4" x2="6.4" y2="17.6"/><line x1="17.6" y1="6.4" x2="19.4" y2="4.6"/></g></svg><svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1z"/><circle class="star" cx="17" cy="5" r="1"/><circle class="star" cx="20.5" cy="9" r="0.7"/></svg></button>
 <div class="wrap">
   <header>
     <h1>The ten platycosms</h1>
@@ -17,6 +18,7 @@
   <main>
     <div class="stage" id="stageBox">
       <canvas id="cv" aria-label="3D diagram of the selected platycosm"></canvas>
+      <button type="button" class="clear" id="aClear" hidden>Clear ghost</button>
       <div class="hint" id="hint" hidden><span>Drag to look · W A S D or arrow keys to move · Q / E down and up · scroll to zoom</span></div>
       <div class="tools">
         <div class="seg" role="group" aria-label="View">
@@ -25,9 +27,13 @@
         </div>
         <label><input type="checkbox" id="tCrab" checked> Crab</label>
         <span class="gap"></span>
-        <label title="Save the PNG with a transparent background"><input type="checkbox" id="tTransp"> Transparent</label>
-        <button id="bPng" type="button">Save PNG</button>
-        <button id="bTheme" type="button" aria-label="Switch between light and dark">Light</button>
+        <div class="savewrap">
+          <button id="bPng" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="pngPop">Save PNG</button>
+          <div class="pop" id="pngPop" role="dialog" aria-label="Save PNG" hidden>
+            <label><input type="checkbox" id="tTransp"> Transparent background</label>
+            <button id="bSave" type="button">Save</button>
+          </div>
+        </div>
       </div>
     </div>
     <aside class="panel" id="panel" aria-live="polite"></aside>

@@ -80,7 +80,9 @@ let light = location.search.includes('light');
 try { if (localStorage.getItem('platy-theme') === 'light') light = true; } catch { /* ignore */ }
 function applyTheme(): void {
   document.documentElement.dataset.theme = light ? 'light' : 'dark';
-  $('bTheme').textContent = light ? 'Dark' : 'Light';
+  const label = light ? 'Switch to dark mode' : 'Switch to light mode';
+  $('bTheme').setAttribute('aria-label', label);
+  $('bTheme').title = label;
   stage.setTheme(light);
 }
 $('bTheme').addEventListener('click', () => {
@@ -91,7 +93,14 @@ $('bTheme').addEventListener('click', () => {
 applyTheme();
 
 /* ---------- save PNG ---------- */
-$('bPng').addEventListener('click', async () => {
+/* the Save PNG button opens a small popover with the transparent-background choice */
+const pop = $('pngPop'), bPng = $('bPng');
+const setPop = (open: boolean) => { pop.hidden = !open; bPng.setAttribute('aria-expanded', String(open)); };
+bPng.addEventListener('click', () => setPop(pop.hidden === true));
+document.addEventListener('pointerdown', (e) => { if (!pop.hidden && !(e.target as HTMLElement).closest('.savewrap')) setPop(false); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !pop.hidden) { setPop(false); bPng.focus(); } });
+$('bSave').addEventListener('click', async () => {
+  setPop(false);
   const blob = await stage.snapshot($<HTMLInputElement>('tTransp').checked);
   if (!blob) return;
   const a = document.createElement('a');

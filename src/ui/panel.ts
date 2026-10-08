@@ -37,7 +37,6 @@ export function renderPanel(el: HTMLElement, stage: Stage, mode: Mode): void {
       <h3>The gluings</h3>
       <div class="small">${paragraphs(content.gluings(mode))}</div>
       <ul class="pairs">${pairHtml}</ul>
-      <button type="button" class="clear" id="aClear" hidden>${mode === 'outside' ? 'Clear ghost' : 'Reset tiling'}</button>
     </section>
     <details>
       <summary>More details</summary>
@@ -46,7 +45,7 @@ export function renderPanel(el: HTMLElement, stage: Stage, mode: Mode): void {
         ${row(wiki('Mapping torus', 'Mapping_torus'), esc(F.mappingTorus.text))}
         ${row(wiki('H₁', 'Homology_(mathematics)'), F.h1)}
         ${row(wiki('Holonomy', 'Holonomy'), `order ${F.holonomyOrder} (${wiki('point group', 'Crystallographic_point_group')} ${F.pointGroup})`)}
-        ${row(wiki('Space group', 'Space_group'), F.spaceGroup)}
+        ${row(wiki('Space group', 'List_of_space_groups'), F.spaceGroup)}
         ${row(`${wiki('Wolf', 'Joseph_A._Wolf')}'s name`, F.wolf)}
         ${row(wiki('π₁', 'Fundamental_group'), esc(F.pi1))}
         ${row('Shape parameters', String(F.shapeParameters))}
@@ -68,8 +67,10 @@ export function renderPanel(el: HTMLElement, stage: Stage, mode: Mode): void {
     ['mouseleave', 'blur'].forEach((ev) => b.addEventListener(ev, () => stage.highlight(null)));
     b.addEventListener('click', () => { stage.anim.start(i); stage.applyOptions(); });
   });
-  const clear = el.querySelector<HTMLButtonElement>('#aClear')!;
-  clear.addEventListener('click', () => { stage.anim.stop(); stage.highlight(null); stage.applyOptions(); });
+  // the Clear button lives in the view (index.html); set with onclick so re-rendering does not stack handlers
+  const clear = document.getElementById('aClear') as HTMLButtonElement;
+  clear.textContent = mode === 'outside' ? 'Clear ghost' : 'Reset tiling';
+  clear.onclick = () => { stage.anim.stop(); stage.highlight(null); stage.applyOptions(); };
   stage.onFrame = () => {
     const a = stage.anim;
     btns.forEach((b) => b.setAttribute('aria-pressed', String(a.gen === Number(b.dataset.pair))));
