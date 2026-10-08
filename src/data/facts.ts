@@ -44,6 +44,8 @@ export interface Facts {
   diameterSq: string;
   /** a plain-language statement of the mapping-torus structure, generated from the computed fibrations and checked in tests */
   mappingTorus: { is: boolean; text: string };
+  /** the product decomposition (surface × circle) if there is one, from the computed fibrations (NOTES.md section 2) */
+  product: string | null;
   sources: Record<string, Source>;
 }
 
@@ -57,8 +59,9 @@ const BASE: Facts[] = [
     seifert: [{ count: 'infinitely many', type: '∘' }],
     surfaces: '(2T)^∞', doubleCovers: { total: 7, types: 'all torocosms' }, bravaisTypes: 14,
     injectivityRadiusSq: 'the minimal vonorm of the lattice', diameterSq: 'see paper section 10',
-    mappingTorus: { is: true, text: 'Yes. T² × S¹, in infinitely many ways (a product, every monodromy is trivial).' },
-    sources: src({ mappingTorus: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', doubleCovers: 'paper' }),
+    mappingTorus: { is: true, text: 'Yes, in infinitely many ways: a T² bundle over S¹ with trivial monodromy.' },
+    product: 'Yes: T² × S¹ (= S¹ × S¹ × S¹)',
+    sources: src({ mappingTorus: 'computed', product: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', doubleCovers: 'paper' }),
   },
   {
     id: 'c2', family: 'helicosm', otherNames: ['half-turn space'], wolf: 'G2', spaceGroup: 'P2₁ (no. 4)',
@@ -67,8 +70,9 @@ const BASE: Facts[] = [
     seifert: [{ count: '1', type: '2222' }, { count: 'infinitely many', type: '××' }],
     surfaces: '(2T)^1; [1sK (2T) 1sK]^∞', doubleCovers: { total: 7, types: '1 torocosm, 6 dicosms' }, bravaisTypes: 5,
     injectivityRadiusSq: 'min(B+C, C+A, A+B, D)', diameterSq: '(B+C)(C+A)(A+B) / (4(BC+CA+AB)) + D/4',
-    mappingTorus: { is: true, text: 'Yes. A torus bundle over a circle; the monodromy is a half turn (order 2).' },
-    sources: src({ mappingTorus: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', doubleCovers: 'paper' }),
+    mappingTorus: { is: true, text: 'Yes: a T² bundle over S¹; the monodromy is a half turn.' },
+    product: null,
+    sources: src({ mappingTorus: 'computed', product: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', doubleCovers: 'paper' }),
   },
   {
     id: 'c3', family: 'helicosm', otherNames: ['one-third turn space'], wolf: 'G3', spaceGroup: 'P3₁ (no. 144) or P3₂ (no. 145)',
@@ -77,8 +81,9 @@ const BASE: Facts[] = [
     seifert: [{ count: '1', type: '333' }],
     surfaces: '(2T)^1', doubleCovers: { total: 1, types: 'a tricosm' }, bravaisTypes: 1,
     injectivityRadiusSq: 'min(2A, D)', diameterSq: '2A/3 + D/4',
-    mappingTorus: { is: true, text: 'Yes. A torus bundle over a circle; the monodromy is a one-third turn (order 3).' },
-    sources: src({ mappingTorus: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', doubleCovers: 'paper' }),
+    mappingTorus: { is: true, text: 'Yes: a T² bundle over S¹; the monodromy is a one-third turn.' },
+    product: null,
+    sources: src({ mappingTorus: 'computed', product: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', doubleCovers: 'paper' }),
   },
   {
     id: 'c4', family: 'helicosm', otherNames: ['quarter-turn space'], wolf: 'G4', spaceGroup: 'P4₁ (no. 76) or P4₃ (no. 78)',
@@ -87,8 +92,9 @@ const BASE: Facts[] = [
     seifert: [{ count: '1', type: '444' }],
     surfaces: '(2T)^1', doubleCovers: { total: 3, types: '1 dicosm, 2 tetracosms' }, bravaisTypes: 1,
     injectivityRadiusSq: 'min(A, D)', diameterSq: 'A/2 + D/4',
-    mappingTorus: { is: true, text: 'Yes. A torus bundle over a circle; the monodromy is a quarter turn (order 4).' },
-    sources: src({ mappingTorus: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', doubleCovers: 'paper' }),
+    mappingTorus: { is: true, text: 'Yes: a T² bundle over S¹; the monodromy is a quarter turn.' },
+    product: null,
+    sources: src({ mappingTorus: 'computed', product: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', doubleCovers: 'paper' }),
   },
   {
     id: 'c6', family: 'helicosm', otherNames: ['one-sixth turn space'], wolf: 'G5', spaceGroup: 'P6₁ (no. 169) or P6₅ (no. 170)',
@@ -97,8 +103,9 @@ const BASE: Facts[] = [
     seifert: [{ count: '1', type: '632' }],
     surfaces: '(2T)^1', doubleCovers: { total: 1, types: 'a tricosm' }, bravaisTypes: 1,
     injectivityRadiusSq: 'min(2A, D)', diameterSq: '2A/3 + D/4',
-    mappingTorus: { is: true, text: 'Yes. A torus bundle over a circle; the monodromy is a one-sixth turn (order 6).' },
-    sources: src({ mappingTorus: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', doubleCovers: 'paper' }),
+    mappingTorus: { is: true, text: 'Yes: a T² bundle over S¹; the monodromy is a one-sixth turn.' },
+    product: null,
+    sources: src({ mappingTorus: 'computed', product: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', doubleCovers: 'paper' }),
   },
   {
     id: 'c22', family: 'didicosm', otherNames: ['Hantzsche–Wendt space'], wolf: 'G6', spaceGroup: 'P2₁2₁2₁ (no. 19)',
@@ -107,8 +114,9 @@ const BASE: Facts[] = [
     seifert: [{ count: '3', type: '22× (all three)' }],
     surfaces: '[∓1sK (2T) ∓1sK]^3', doubleCovers: { total: 3, types: 'all dicosms' }, bravaisTypes: 3,
     injectivityRadiusSq: 'min(A, B, C)', diameterSq: 'at least max(α, β, γ)/4 (see paper)',
-    mappingTorus: { is: false, text: 'No. Its first homology is finite (b₁ = 0), so it does not fibre over a circle. It is the only platycosm like this.' },
-    sources: src({ mappingTorus: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', doubleCovers: 'paper' }),
+    mappingTorus: { is: false, text: 'No: H₁ is finite (b₁ = 0), so it does not fibre over a circle. The only platycosm that is not a mapping torus.' },
+    product: null,
+    sources: src({ mappingTorus: 'computed', product: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', doubleCovers: 'paper' }),
   },
   {
     id: 'a1p', family: 'amphicosm', otherNames: ['Klein bottle × circle'], wolf: 'B1', spaceGroup: 'Pc (no. 7)',
@@ -118,8 +126,9 @@ const BASE: Facts[] = [
     surfaces: '[+1gT (2T) +1gT]^1; (2K)^∞, (2T)^∞', orientableDoubleCover: 'the torocosm c1',
     doubleCovers: { total: 7, types: '1 torocosm, 4 first amphicosms, 2 second amphicosms' }, bravaisTypes: 5,
     injectivityRadiusSq: 'min(A+B, B+C, A+C, D)', diameterSq: '(B+C)(C+A)(A+B) / (4(BC+CA+AB)) + D/4',
-    mappingTorus: { is: true, text: 'Yes, in infinitely many ways. Klein bottle × S¹ (a product), or a torus bundle whose monodromy is a reflection.' },
-    sources: src({ mappingTorus: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', orientableDoubleCover: 'paper', doubleCovers: 'paper' }),
+    mappingTorus: { is: true, text: 'Yes, in infinitely many ways: a T² bundle whose monodromy is a reflection fixing both generating loops, or a K bundle (Klein bottle fibre) with trivial monodromy.' },
+    product: 'Yes: K × S¹ (K the Klein bottle)',
+    sources: src({ mappingTorus: 'computed', product: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', orientableDoubleCover: 'paper', doubleCovers: 'paper' }),
   },
   {
     id: 'a1m', family: 'amphicosm', otherNames: [], wolf: 'B2', spaceGroup: 'Cc (no. 9)',
@@ -129,8 +138,9 @@ const BASE: Facts[] = [
     surfaces: '[−1gT (2T) −1gT]^1; (2K)^∞, (2T)^∞', orientableDoubleCover: 'the torocosm c1',
     doubleCovers: { total: 3, types: '1 torocosm, 2 first amphicosms' }, bravaisTypes: 5,
     injectivityRadiusSq: 'min(A+B, A+C, B+C+D, 4D, 4(B+C))', diameterSq: 'a long case analysis, see paper section 9',
-    mappingTorus: { is: true, text: 'Yes, in infinitely many ways: a torus bundle whose monodromy is a reflection, or a Klein bottle bundle with a twisted monodromy. Unlike the first amphicosm it is not a product with a circle.' },
-    sources: src({ mappingTorus: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', orientableDoubleCover: 'paper', doubleCovers: 'paper' }),
+    mappingTorus: { is: true, text: 'Yes, in infinitely many ways: a T² bundle whose monodromy is a reflection swapping the two generating loops, or a K bundle with twisted monodromy.' },
+    product: null,
+    sources: src({ mappingTorus: 'computed', product: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', orientableDoubleCover: 'paper', doubleCovers: 'paper' }),
   },
   {
     id: 'a2p', family: 'amphidicosm', otherNames: [], wolf: 'B3', spaceGroup: 'Pca2₁ (no. 29)',
@@ -140,8 +150,9 @@ const BASE: Facts[] = [
     surfaces: '[+1gsK (2K) +1gsK]^1; (2K)^1, [∓1sK (2T) ∓1gT]^1', orientableDoubleCover: 'the dicosm c2',
     doubleCovers: { total: 7, types: '1 dicosm, 2 first amphicosms, 2 first amphidicosms, 2 second amphidicosms' }, bravaisTypes: 1,
     injectivityRadiusSq: 'min(A, B, C)', diameterSq: '(A+B+C)/4',
-    mappingTorus: { is: true, text: 'Yes. A Klein bottle bundle over a circle with a twisted monodromy (not a product).' },
-    sources: src({ mappingTorus: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', orientableDoubleCover: 'paper', doubleCovers: 'paper' }),
+    mappingTorus: { is: true, text: 'Yes: a K bundle (Klein bottle fibre) over S¹ with twisted monodromy.' },
+    product: null,
+    sources: src({ mappingTorus: 'computed', product: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', orientableDoubleCover: 'paper', doubleCovers: 'paper' }),
   },
   {
     id: 'a2m', family: 'amphidicosm', otherNames: [], wolf: 'B4', spaceGroup: 'Pa2₁ (no. 33)',
@@ -151,8 +162,9 @@ const BASE: Facts[] = [
     surfaces: '[−1gT (2T) −1sK]^1; (2K)^1, [∓1sK (2T) ∓1gT]^1', orientableDoubleCover: 'the dicosm c2',
     doubleCovers: { total: 3, types: '1 dicosm, 2 first amphicosms' }, bravaisTypes: 1,
     injectivityRadiusSq: 'min(A, B, 4C)', diameterSq: 'at least max(β, γ)/4 (see paper)',
-    mappingTorus: { is: true, text: 'Yes. A Klein bottle bundle over a circle with a twisted monodromy (not a product).' },
-    sources: src({ mappingTorus: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', orientableDoubleCover: 'paper', doubleCovers: 'paper' }),
+    mappingTorus: { is: true, text: 'Yes: a K bundle (Klein bottle fibre) over S¹ with twisted monodromy.' },
+    product: null,
+    sources: src({ mappingTorus: 'computed', product: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', orientableDoubleCover: 'paper', doubleCovers: 'paper' }),
   },
 ];
 

@@ -47,16 +47,18 @@ function syncUi(): void {
   renderPanel($('panel'), stage, mode);
   stage.applyOptions();
 }
+/** the view named in the hash; a bare #id (a link in the text) keeps the current view */
+const viewOf = (view: string | undefined): Mode => (view === 'inside' ? 'inside' : view === 'outside' ? 'outside' : mode);
 function fromHash(): void {
   const [id, view, extra] = location.hash.slice(1).split('/');
-  go(id || 'c22', view === 'inside' ? 'inside' : 'outside');
+  go(id || 'c22', viewOf(view));
   // #c22/outside/anim1@0.5 starts gluing 1 paused at half way (used for slides and screenshots)
   const a = /^anim([0-9]+)@([0-9.]+)$/.exec(extra ?? '');
   if (a) { stage.anim.start(Number(a[1]) - 1); stage.anim.scrub(Number(a[2])); stage.applyOptions(); }
 }
 window.addEventListener('hashchange', () => {
   const [id, view] = location.hash.slice(1).split('/');
-  const m: Mode = view === 'inside' ? 'inside' : 'outside';
+  const m = viewOf(view);
   if (id !== current.id || m !== mode) fromHash();
 });
 

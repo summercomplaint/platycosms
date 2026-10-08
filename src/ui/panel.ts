@@ -40,8 +40,9 @@ export function renderPanel(el: HTMLElement, stage: Stage, mode: Mode): void {
     <details>
       <summary>More details</summary>
       <dl>
-        ${row(wiki('Orientable', 'Orientability'), `${def.orientable ? 'Yes' : 'No'}${F.metachiral ? ', in two mirror-image forms' : ''}${F.orientableDoubleCover ? `. Orientable double cover: ${F.orientableDoubleCover}` : ''}`)}
+        ${row(wiki('Orientable', 'Orientability'), `${def.orientable ? 'Yes' : 'No'}${F.metachiral ? ', in two mirror-image forms' : ''}${F.orientableDoubleCover ? `. Orientable double cover: ${F.orientableDoubleCover.replace(/(c\d+)$/, '<a href="#$1">$1</a>')}` : ''}`)}
         ${row(wiki('Mapping torus', 'Mapping_torus'), esc(F.mappingTorus.text))}
+        ${row(wiki('Product space?', 'Product_topology'), F.product ? esc(F.product) : 'No')}
         ${row(wiki('H₁', 'Homology_(mathematics)'), F.h1)}
         ${row(wiki('Holonomy', 'Holonomy'), `order ${F.holonomyOrder} (${wiki('point group', 'Crystallographic_point_group')} ${F.pointGroup})`)}
         ${row(wiki('Space group', 'List_of_space_groups'), F.spaceGroup)}
@@ -50,7 +51,6 @@ export function renderPanel(el: HTMLElement, stage: Stage, mode: Mode): void {
         ${row('Shape parameters', String(F.shapeParameters))}
         ${row(wiki('Seifert fibrations', 'Seifert_fiber_space'), esc(F.seifert.map((s) => `${s.count}: ${s.type}`).join('; ')))}
         ${row('Flat surfaces', esc(F.surfaces))}
-        ${row(wiki('Double covers', 'Covering_space'), `${F.doubleCovers.total}: ${F.doubleCovers.types}`)}
         ${row(wiki('Bravais types', 'Bravais_lattice'), String(F.bravaisTypes))}
         ${row(`${wiki('Injectivity radius', 'Injectivity_radius')}²`, esc(F.injectivityRadiusSq))}
         ${row(`${wiki('Diameter', 'Diameter')}²`, esc(F.diameterSq))}

@@ -6,6 +6,7 @@ Every piece of prose on the page lives in this folder, one small file per piece.
 
 - Paragraphs are separated by a blank line.
 - `**bold**`, `*italic*`, and links: `[Klein bottle](https://en.wikipedia.org/wiki/Klein_bottle)`.
+- Links to another platycosm use its id after a #: `[the torocosm](#c1)` switches the page to it.
 - That is all. Anything else (HTML, headings) shows up as plain text.
 
 ## Files

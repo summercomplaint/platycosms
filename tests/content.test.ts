@@ -22,6 +22,7 @@ describe('the Markdown subset', () => {
     expect(inline('**b** and *i*')).toBe('<b>b</b> and <i>i</i>');
     expect(inline('[K](https://en.wikipedia.org/wiki/Klein_bottle)')).toBe('<a href="https://en.wikipedia.org/wiki/Klein_bottle" target="_blank" rel="noopener">K</a>');
     expect(inline('[x](javascript:alert(1))')).not.toContain('href');
+    expect(inline('[the torocosm](#c1)')).toBe('<a href="#c1">the torocosm</a>');
   });
   it('splits paragraphs on blank lines and joins wrapped lines', () => {
     expect(paragraphs('one\ntwo\n\nthree')).toBe('<p>one two</p><p>three</p>');
