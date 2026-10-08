@@ -39,7 +39,7 @@ b { font-weight: 700; }
     760px 760px, 760px 760px, 760px 760px, 760px 760px, 100% 100%, 100% 100%, auto;
 }
 
-.wrap { max-width: 1360px; margin-inline: auto; display: grid; gap: 16px; }
+.wrap { max-width: 1360px; margin-inline: auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 header { display: grid; gap: 10px; }
 h1 { font-weight: 700; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.05; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
 h1::after { content: ""; display: block; width: 72px; height: 4px; background: var(--accent); margin-top: 12px; border-radius: 2px; }
@@ -120,3 +120,9 @@ dd { margin: 0; overflow-wrap: anywhere; }
 .details dd { font-size: .88rem; }
 footer { font-size: .84rem; max-width: 120ch; }
 @media (max-width: 960px) { main { grid-template-columns: minmax(0, 1fr); } .stage { height: 64vh; } .panel { max-height: none; } }
+/* phones: the platycosm bar becomes one row that scrolls sideways (swipe), running to the screen edges */
+@media (max-width: 640px) {
+  nav { flex-wrap: nowrap; overflow-x: auto; margin-inline: -16px; padding: 2px 16px 6px; scroll-padding-inline: 16px; scroll-snap-type: x proximity; scrollbar-width: none; overscroll-behavior-x: contain; }
+  nav::-webkit-scrollbar { display: none; }
+  nav button { flex: none; scroll-snap-align: start; }
+}

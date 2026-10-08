@@ -39,8 +39,16 @@ function go(id: string, m: Mode): void {
   syncUi();
   try { history.replaceState(null, '', '#' + P.id + (m === 'inside' ? '/inside' : '')); } catch { /* ignore */ }
 }
+let tabsShown = false; // the first scroll (page load) jumps, later ones glide
 function syncUi(): void {
   document.querySelectorAll<HTMLElement>('#tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.id === current.id)));
+  // on phones the bar scrolls sideways; keep the chosen platycosm in view (scrolls only the bar, never the page)
+  const tabBar = $('tabs'), sel = tabBar.querySelector<HTMLElement>('[aria-selected="true"]');
+  if (sel && tabBar.scrollWidth > tabBar.clientWidth) {
+    const left = sel.offsetLeft - tabBar.offsetLeft, right = left + sel.offsetWidth;
+    if (left < tabBar.scrollLeft || right > tabBar.scrollLeft + tabBar.clientWidth) tabBar.scrollTo({ left: left - 16, behavior: tabsShown ? 'smooth' : 'auto' });
+  }
+  tabsShown = true;
   $('mOut').setAttribute('aria-pressed', String(mode === 'outside'));
   $('mIn').setAttribute('aria-pressed', String(mode === 'inside'));
   $('hint').hidden = mode !== 'inside';
