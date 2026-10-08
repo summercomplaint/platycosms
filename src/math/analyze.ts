@@ -159,6 +159,47 @@ class Skeleton {
   }
 }
 
+/** The part of a convex polygon on the side m.p <= d of a line in its plane. */
+function halfPlane(poly: Vec3[], m: Vec3, d: number): Vec3[] {
+  const out: Vec3[] = [];
+  for (let k = 0; k < poly.length; k++) {
+    const P = poly[k], Q = poly[(k + 1) % poly.length];
+    const sp = dot(m, P) - d, sq = dot(m, Q) - d;
+    if (sp <= TOL) out.push(P);
+    if ((sp < -TOL && sq > TOL) || (sp > TOL && sq < -TOL)) out.push(add(P, mul(sub(Q, P), sp / (sp - sq))));
+  }
+  return out;
+}
+
+const onSegment = (p: Vec3, a: Vec3, b: Vec3): boolean => {
+  const ab = sub(b, a), t = dot(sub(p, a), ab) / dot(ab, ab);
+  return t > -TOL && t < 1 + TOL && dist(p, add(a, mul(ab, t))) < TOL;
+};
+
+/**
+ * Cut a face into cells along the seams lying in it. A seam cuts a cell only where its line crosses the whole cell
+ * along skeleton edges (so a seam ending inside a cell does not cut it).
+ */
+function faceCells(f: Face, faceCorners: Vec3[], seams: [Vec3, Vec3][], sk: Skeleton): Vec3[][] {
+  const onSkeleton = (p: Vec3) => sk.E.some(([i, j]) => onSegment(p, sk.V[i], sk.V[j]));
+  let cells = [faceCorners];
+  for (const [P, Q] of seams) {
+    if (Math.abs(outside(f, P)) > TOL || Math.abs(outside(f, Q)) > TOL) continue;
+    const dir = sub(Q, P), m0 = cross(dir, f.n), m = mul(m0, 1 / len(m0)), d = dot(m, P);
+    const next: Vec3[][] = [];
+    for (const cell of cells) {
+      const chord = clipSegmentToPolygon(sub(P, mul(dir, 1e3)), add(Q, mul(dir, 1e3)), cell, f.n);
+      const crosses = chord && dist(chord[0], chord[1]) > 1e-7 &&
+        [0.1, 0.3, 0.5, 0.7, 0.9].every((t) => onSkeleton(add(chord[0], mul(sub(chord[1], chord[0]), t))));
+      if (!crosses) { next.push(cell); continue; }
+      for (const piece of [halfPlane(cell, m, d), halfPlane(cell, mul(m, -1), -d)])
+        if (piece.length >= 3 && polygonArea(piece) > 1e-9) next.push(piece);
+    }
+    cells = next;
+  }
+  return cells;
+}
+
 /** A seeded generator so the sampling is repeatable. */
 function rng(seed: number): () => number {
   let a = seed;
@@ -199,6 +240,7 @@ export function analyze(spec: Spec, opts: AnalyzeOptions = {}): Analysis {
   const D: Domain = cloneDomain(D0);
   const sk = new Skeleton(D0);
   const corners = D0.F.map((f) => faceCorners(D0, f));
+  for (const [p, q] of spec.extraEdges ?? []) sk.insertSegment(p, q);
   for (let round = 0; round < 40; round++) {
     let changed = false;
     for (const g of nonId) for (const v of [...sk.V]) {
@@ -263,8 +305,9 @@ export function analyze(spec: Spec, opts: AnalyzeOptions = {}): Analysis {
     return D0.F.filter((f) => Math.abs(outside(f, m)) < TOL).length === 1;
   });
 
-  // 4. Regions: overlaps of a face of D with a coplanar, opposed face of a neighbouring tile.
-  const regions: Region[] = [];
+  // 4. Regions: overlaps of a face of D with a coplanar, opposed face of a neighbouring tile,
+  //    then cut further by seams that are not region boundaries (extra edges and their images).
+  const glued: Region[] = [];
   for (const g of nonId) D0.F.forEach((gf, gi) => {
     const gc = corners[gi].map((p) => apply(g, p));
     const gn = apply({ A: g.A, t: [0, 0, 0] }, gf.n);
@@ -272,9 +315,15 @@ export function analyze(spec: Spec, opts: AnalyzeOptions = {}): Analysis {
       if (dot(gn, f.n) > -1 + 1e-6) return;
       if (gc.some((p) => Math.abs(outside(f, p)) > TOL)) return;
       const Q = clipPolygon(gc, corners[fi], f.n);
-      if (Q.length >= 3 && polygonArea(Q) > 1e-7) regions.push({ f: fi, g: gi, gamma: g, poly: Q });
+      if (Q.length >= 3 && polygonArea(Q) > 1e-7) glued.push({ f: fi, g: gi, gamma: g, poly: Q });
     });
   });
+  const cells = D0.F.map((f, fi) => faceCells(f, corners[fi], D.E.filter((_, k) => isSeam[k]).map(([a, b]) => [D.V[a], D.V[b]] as [Vec3, Vec3]), sk));
+  const regions: Region[] = [];
+  for (const r of glued) for (const c of cells[r.f]) {
+    const Q = clipPolygon(r.poly, c, D0.F[r.f].n);
+    if (Q.length >= 3 && polygonArea(Q) > 1e-7) regions.push({ ...r, poly: Q });
+  }
   D0.F.forEach((_f, fi) => {
     const area = polygonArea(corners[fi]);
     const got = regions.filter((r) => r.f === fi).reduce((s, r) => s + polygonArea(r.poly), 0);

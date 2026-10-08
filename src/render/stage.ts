@@ -15,6 +15,7 @@ import { CrabModel, loadCrab } from './crab';
 import { FirstPerson } from './firstPerson';
 import { isoPath, toMatrix4 } from './iso3d';
 import { TileField } from './tiles';
+import { VERT0_LIGHT, vertColor } from './palette';
 
 export type Mode = 'outside' | 'inside';
 export interface Options { crab: boolean }
@@ -29,8 +30,8 @@ interface Entry {
   kitLow?: CellKit;
 }
 
-const SPACE = new Color('#000000');
-const ACCENT = new Color('#3dff7a');
+const SPACE = new Color('#000000'), PAPER = new Color('#ffffff');
+const ACCENT_DARK = new Color('#3dff7a'), ACCENT_LIGHT = new Color('#00953a');
 
 /** Owns the renderer, the scene and both views (outside the cell, and inside among its copies). */
 export class Stage {
@@ -49,6 +50,9 @@ export class Stage {
   private cache = new Map<string, Entry>();
   private crab: CrabModel | null = null;
   private stars = makeStars();
+  private light = false;
+  private bg = SPACE;
+  private accent = ACCENT_DARK;
 
   // outside view
   private outside: Group | null = null;
@@ -84,7 +88,7 @@ export class Stage {
     fill.position.set(-4, 2, -2);
     this.scene.add(fill);
     this.scene.add(new AmbientLight(0xffffff, 0.35));
-    this.scene.background = SPACE;
+    this.scene.background = this.bg;
     new ResizeObserver(() => this.resize()).observe(canvas.parentElement ?? canvas);
     this.resize();
     requestAnimationFrame(() => this.frame());
@@ -117,6 +121,28 @@ export class Stage {
     this.hoverPolys = polys;
   }
 
+  /** light (white page, no stars) or dark (space) */
+  setTheme(light: boolean): void {
+    this.light = light;
+    this.bg = light ? PAPER : SPACE;
+    this.accent = light ? ACCENT_LIGHT : ACCENT_DARK;
+    this.scene.background = this.bg;
+    this.stars.visible = !light;
+    for (const e of this.cache.values()) for (const k of [e.kit, e.kitLow]) if (k) this.paintKit(k);
+    // recolour in place (a rebuild would reset the camera)
+    if (this.scene.fog) (this.scene.fog as Fog).color.copy(this.bg);
+    this.outside?.traverse((o) => {
+      if (o instanceof LineSegments) (o.material as LineBasicMaterial).color.copy(this.accent);
+      if (o.userData.ball0) ((o as Mesh).material as MeshStandardMaterial).color.set(light ? VERT0_LIGHT : vertColor(0));
+    });
+    this.shownHighlight = undefined;
+  }
+
+  /** theme-dependent colours of a kit: vertex class 0 is white on black, near-black on white */
+  private paintKit(k: CellKit): void {
+    for (const p of k.parts) if (p.kind === 'ball' && p.cls === 0) (p.material as MeshStandardMaterial).color.set(this.light ? VERT0_LIGHT : vertColor(0));
+  }
+
   /** a PNG of the current view at high resolution */
   snapshot(transparent: boolean): Promise<Blob | null> {
     const w = this.canvas.clientWidth, h = this.canvas.clientHeight, pr = this.renderer.getPixelRatio();
@@ -127,7 +153,7 @@ export class Stage {
     this.renderer.render(this.scene, this.camera);
     return new Promise((resolve) => {
       this.canvas.toBlob((b) => {
-        this.scene.background = SPACE;
+        this.scene.background = this.bg;
         this.stars.visible = starsShown;
         this.renderer.setPixelRatio(pr);
         this.renderer.setSize(w, h, false);
@@ -144,6 +170,7 @@ export class Stage {
     if (!R.ok) console.warn('analysis problems for', def.id, R.errors);
     const gamma = new Gamma(def.gens, def.lattice);
     const kit = buildKit(R, { quality: 'high', crab: this.crab });
+    this.paintKit(kit);
     e = { def, R, pairs: pairings(R), gamma, L: Math.cbrt(R.volume), kit };
     this.cache.set(def.id, e);
     return e;
@@ -212,9 +239,10 @@ export class Stage {
       mat.depthWrite = false;
       const m = this.meshOf(p, mat);
       m.renderOrder = 5;
+      m.userData.ball0 = p.kind === 'ball' && p.cls === 0; // recoloured by setTheme
       ghost.add(m);
     }
-    const outline = new LineSegments(lg, new LineBasicMaterial({ color: ACCENT }));
+    const outline = new LineSegments(lg, new LineBasicMaterial({ color: this.accent }));
     outline.renderOrder = 6;
     ghost.add(outline);
     ghost.visible = false;
@@ -240,11 +268,11 @@ export class Stage {
     this.camera.near = 0.02 * e.L;
     this.camera.far = 40 * e.L;
     this.camera.updateProjectionMatrix();
-    e.kitLow ??= buildKit(e.R, { quality: 'low', crab: this.crab });
+    if (!e.kitLow) { e.kitLow = buildKit(e.R, { quality: 'low', crab: this.crab }); this.paintKit(e.kitLow); }
     this.tiles = new TileField(e.kitLow.parts, 500);
     this.scene.add(this.tiles.group);
     const R = this.tileRadius(e);
-    this.scene.fog = new Fog(SPACE, R * 0.45, R * 1.0);
+    this.scene.fog = new Fog(this.bg, R * 0.45, R * 1.0);
     // start halfway between the centre (where the crab is) and a corner, looking at the crab
     const D = e.def.dom(), c = v3(e.kit.centroid);
     this.fp.pos.copy(c).addScaledVector(v3(D.V[0]).sub(c), 0.55);
@@ -333,7 +361,7 @@ export class Stage {
     this.shownHighlight = want;
     this.highlightGroup.clear();
     if (!want) return;
-    const mat = new MeshBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.24, side: DoubleSide, depthWrite: false });
+    const mat = new MeshBasicMaterial({ color: this.accent, transparent: true, opacity: this.light ? 0.3 : 0.24, side: DoubleSide, depthWrite: false });
     for (const { poly } of want) {
       const pos: number[] = [];
       for (let i = 1; i < poly.length - 1; i++) for (const k of [0, i, i + 1]) pos.push(...poly[k]);

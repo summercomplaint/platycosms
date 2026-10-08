@@ -6,12 +6,16 @@ import './style.css';
 import { PLATYCOSMS, PlatycosmDef, byId } from './data/platycosms';
 import { Stage, Mode } from './render/stage';
 import { renderPanel } from './ui/panel';
+import { content } from './content';
+import { paragraphs } from './ui/markdown';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 const stage = new Stage($('cv') as HTMLCanvasElement);
 let current: PlatycosmDef = PLATYCOSMS[5];
 let mode: Mode = 'outside';
+
+$('intro').innerHTML = content.intro().map((s) => `<div>${paragraphs(s)}</div>`).join('');
 
 /* ---------- tabs ---------- */
 const tabs = $('tabs');
@@ -70,6 +74,21 @@ const crabBox = $<HTMLInputElement>('tCrab');
 if (location.search.includes('nocrab')) crabBox.checked = false;
 stage.options.crab = crabBox.checked;
 crabBox.addEventListener('change', () => { stage.options.crab = crabBox.checked; stage.applyOptions(); });
+
+/* ---------- light / dark (dark, the space theme, is the default; ?light forces light) ---------- */
+let light = location.search.includes('light');
+try { if (localStorage.getItem('platy-theme') === 'light') light = true; } catch { /* ignore */ }
+function applyTheme(): void {
+  document.documentElement.dataset.theme = light ? 'light' : 'dark';
+  $('bTheme').textContent = light ? 'Dark' : 'Light';
+  stage.setTheme(light);
+}
+$('bTheme').addEventListener('click', () => {
+  light = !light;
+  try { localStorage.setItem('platy-theme', light ? 'light' : 'dark'); } catch { /* ignore */ }
+  applyTheme();
+});
+applyTheme();
 
 /* ---------- save PNG ---------- */
 $('bPng').addEventListener('click', async () => {

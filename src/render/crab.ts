@@ -1,5 +1,5 @@
 import {
-  BufferGeometry, CanvasTexture, Color, Euler, LoadingManager, Material, Matrix4, Mesh, MeshStandardMaterial, SRGBColorSpace, Vector3,
+  BufferAttribute, BufferGeometry, CanvasTexture, Color, Euler, LoadingManager, Material, Matrix4, Mesh, MeshStandardMaterial, SRGBColorSpace, Vector3,
 } from 'three';
 import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
 import { DecalGeometry } from 'three/examples/jsm/geometries/DecalGeometry.js';
@@ -7,8 +7,8 @@ import daeUrl from '../assets/crab/model.dae?url';
 
 /**
  * The fiddler crab ("Fiddler Crab" by renceed, CC BY-NC 4.0, https://skfb.ly/6xDJv), recoloured so its handedness is
- * easy to see: a blue body, a red big claw, white eyestalks, and an "R" on the back and the belly that reads backwards
- * on a mirrored copy. Normalised to a unit bounding sphere centred at the origin, upright along +z, facing +y.
+ * easy to see: a teal body, a big claw fading from teal to coral, white eyestalks, and a coral "R" on the back and the
+ * belly that reads backwards on a mirrored copy. None of these colours is an edge colour. Normalised to a unit bounding sphere centred at the origin, upright along +z, facing +y.
  */
 export interface CrabPart { geometry: BufferGeometry; material: Material }
 export interface CrabModel { parts: CrabPart[] }
@@ -18,7 +18,8 @@ export const loadCrab = (): Promise<CrabModel> => (cached ??= load());
 
 // the model's four meshes, by their Collada node names
 const BODY = 'Group2828', EYES = 'Group21201', LEGS = 'Group37975', CLAW = 'Group16311';
-const COLOR: Record<string, string> = { [BODY]: '#2f7dff', [LEGS]: '#4f95ff', [EYES]: '#ffffff', [CLAW]: '#ff2b2b' };
+export const CRAB_TEAL = '#19c9b0', CRAB_CORAL = '#ff6f61';
+const COLOR: Record<string, string> = { [BODY]: CRAB_TEAL, [LEGS]: '#5fe0cc', [EYES]: '#ffffff' };
 
 async function load(): Promise<CrabModel> {
   // the .dae points at a bitmap that is not shipped; answer that request with nothing so it does not 404
@@ -61,8 +62,12 @@ async function load(): Promise<CrabModel> {
     geometry.applyMatrix4(norm);
     geometry.computeBoundingSphere();
     if (name === BODY) body = geometry;
-    const material = new MeshStandardMaterial({ color: new Color(COLOR[name] ?? '#2f7dff'), roughness: 0.4, metalness: 0 });
-    parts.push({ geometry, material });
+    if (name === CLAW) {
+      clawGradient(geometry);
+      parts.push({ geometry, material: new MeshStandardMaterial({ vertexColors: true, roughness: 0.4, metalness: 0 }) });
+    } else {
+      parts.push({ geometry, material: new MeshStandardMaterial({ color: new Color(COLOR[name] ?? CRAB_TEAL), roughness: 0.4, metalness: 0 }) });
+    }
   }
 
   if (body) {
@@ -80,7 +85,25 @@ async function load(): Promise<CrabModel> {
   return { parts };
 }
 
-/** a white letter with a dark outline on a transparent square */
+/**
+ * Colour the big claw by distance from where it meets the body: teal at the arm, coral over the hand and fingers.
+ * The joint is the claw vertex nearest the centre of the body.
+ */
+function clawGradient(g: BufferGeometry): void {
+  const p = g.getAttribute('position'), joint = new Vector3(), v = new Vector3(), body = new Vector3(0, -0.12, 0.1);
+  let best = Infinity;
+  for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i); const d = v.distanceTo(body); if (d < best) { best = d; joint.copy(v); } }
+  const dists = Array.from({ length: p.count }, (_, i) => v.fromBufferAttribute(p, i).distanceTo(joint));
+  const max = Math.max(...dists);
+  const teal = new Color(CRAB_TEAL), coral = new Color(CRAB_CORAL), c = new Color(), col = new Float32Array(p.count * 3);
+  dists.forEach((d, i) => {
+    const t = Math.min(1, Math.max(0, (d / max - 0.3) / 0.4)), s = t * t * (3 - 2 * t);
+    c.copy(teal).lerp(coral, s).toArray(col, 3 * i);
+  });
+  g.setAttribute('color', new BufferAttribute(col, 3));
+}
+
+/** a coral letter with a thin dark outline on a transparent square */
 function letterTexture(ch: string): CanvasTexture {
   const c = document.createElement('canvas');
   c.width = c.height = 256;
@@ -89,10 +112,10 @@ function letterTexture(ch: string): CanvasTexture {
   g.textAlign = 'center';
   g.textBaseline = 'middle';
   g.lineJoin = 'round';
-  g.lineWidth = 22;
-  g.strokeStyle = '#06123a';
+  g.lineWidth = 12;
+  g.strokeStyle = '#062a26';
   g.strokeText(ch, 128, 140);
-  g.fillStyle = '#ffffff';
+  g.fillStyle = CRAB_CORAL;
   g.fillText(ch, 128, 140);
   const t = new CanvasTexture(c);
   t.colorSpace = SRGBColorSpace;

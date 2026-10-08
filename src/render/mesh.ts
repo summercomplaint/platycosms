@@ -145,12 +145,15 @@ export interface ModelOptions {
   quality?: 'high' | 'low';
 }
 
-/** Proportions, in units of the tube radius r. Long arrowheads (they read as arrows from any side), flared out of the tube. */
-export const STYLE = { ball: 1.65, arrowLen: 4.2, arrowFlare: 1.85 };
+/**
+ * Proportions, in units of the cell size L. Thin tubes; the tube stops at the arrowhead's base and starts again at its
+ * tip, so the whole cone shows ("—▶—") and reads as an arrow from any side.
+ */
+export const STYLE = { tube: 0.03, ball: 0.07, arrowLen: 0.17, arrowFlare: 0.075, maxArrowFrac: 0.45 };
 
 export function buildModel(R: Analysis, opts: ModelOptions = {}): Model {
   const D = R.D, planes: Plane[] = R.spec.dom().F.map((f) => ({ n: f.n, d: f.d }));
-  const L = Math.cbrt(R.volume), r = (opts.radius ?? 0.06) * L, eps = 0.012 * r;
+  const L = Math.cbrt(R.volume), r = (opts.radius ?? STYLE.tube) * L, eps = 0.012 * r;
   const seg = opts.quality === 'low' ? 12 : 32, stacks = opts.quality === 'low' ? 10 : 20, slices = opts.quality === 'low' ? 14 : 32;
   const groups = new Map<string, { kind: Kind; cls: number; pos: number[]; nrm: number[] }>();
   const pieces: Piece[] = [];
@@ -164,11 +167,14 @@ export function buildModel(R: Analysis, opts: ModelOptions = {}): Model {
   D.E.forEach((e, i) => {
     const a = D.V[e[0]], b = D.V[e[1]], d = unit(sub(b, a)), mid = mul(add(a, b), 0.5);
     const cls = R.eClass[i], pt = R.eFlip[i] ? mul(d, -1) : d;
-    emit('tube', cls, clip(cylinder(a, b, r, seg), planes, eps));
-    const h = STYLE.arrowLen * r, base = sub(mid, mul(pt, h / 2)), apex = add(mid, mul(pt, h / 2));
-    emit('arrow', cls, clip(cone(base, apex, STYLE.arrowFlare * r, seg), planes, 2 * eps));
+    const h = Math.min(STYLE.arrowLen * L, STYLE.maxArrowFrac * len(sub(b, a)));
+    const base = sub(mid, mul(pt, h / 2)), apex = add(mid, mul(pt, h / 2));
+    // the tube in two pieces, leaving a gap for the arrowhead (the cone's base is wider than the tube, so no hole shows)
+    emit('tube', cls, clip(cylinder(a, sub(mid, mul(d, h / 2)), r, seg), planes, eps));
+    emit('tube', cls, clip(cylinder(add(mid, mul(d, h / 2)), b, r, seg), planes, eps));
+    emit('arrow', cls, clip(cone(base, apex, STYLE.arrowFlare * L * (h / (STYLE.arrowLen * L)), seg), planes, 2 * eps));
   });
-  D.V.forEach((p, i) => emit('ball', R.vClass[i], clip(sphere(p, STYLE.ball * r, stacks, slices), planes, 3 * eps)));
+  D.V.forEach((p, i) => emit('ball', R.vClass[i], clip(sphere(p, STYLE.ball * L, stacks, slices), planes, 3 * eps)));
   return {
     r, eps, planes, pieces,
     groups: [...groups.values()].map((g) => ({ kind: g.kind, cls: g.cls, pos: new Float32Array(g.pos), nrm: new Float32Array(g.nrm) })),

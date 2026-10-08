@@ -3,11 +3,11 @@
 Interactive 3D diagrams of the ten closed flat 3-manifolds (Conway and Rossetti's "platycosms"), drawn the way Greg Egan draws
 the Hantzsche–Wendt space: a fundamental cell with a coloured tube on every edge (same colour, same edge of the space) and
 arrowheads for direction. Each space can be seen from outside and from inside, with a fiddler crab in every cell (recoloured:
-blue body, red big claw, an "R" on its back) so you can see how the copies are related, including when one is a mirror image.
+teal body, big claw fading to coral, a coral "R" on its back and belly) so you can see how the copies are related, including when one is a mirror image.
 Each face gluing can be played as an animation: a copy of the cell moves by the gluing map and lands against its partner face.
 The side panel explains each space for a newcomer (through the mapping torus picture where there is one) and lists what the
 paper says (orientable double cover, H₁, Seifert fibrations, and more).
-Every fact is sourced in [`NOTES.md`](NOTES.md).
+Every fact is sourced in [`NOTES.md`](NOTES.md). The page's prose is in [`content/`](content/README.md), one small file per piece, to edit directly.
 
 ## Run it
 ```

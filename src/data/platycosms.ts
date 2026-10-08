@@ -17,6 +17,9 @@ const e1: Vec3 = [1, 0, 0], e2: Vec3 = [0, 1, 0], e3: Vec3 = [0, 0, 1];
 const hexA: Vec3 = [1, 0, 0], hexB: Vec3 = [0.5, S3 / 2, 0];
 const hexPrism = () => prismDomain(6, 1 / S3, 30, -h, h);
 const cube = () => boxDomain([-h, -h, -h], [h, h, h]);
+/** a loop of four segments around a box, across its long faces: x = c on the box [0,1]x[0,h]x[0,h], or z = c on [0,h]x[0,h]x[-h,h] */
+const loopX = (c: number): [Vec3, Vec3][] => [[[c, 0, 0], [c, h, 0]], [[c, h, 0], [c, h, h]], [[c, h, h], [c, 0, h]], [[c, 0, h], [c, 0, 0]]];
+const loopZ = (c: number): [Vec3, Vec3][] => [[[0, 0, c], [h, 0, c]], [[h, 0, c], [h, h, c]], [[h, h, c], [0, h, c]], [[0, h, c], [0, 0, c]]];
 
 // Generators follow Conway & Rossetti, Table 12 (translation lattice Z^3 unless noted).
 const screw2 = diag(-1, -1, 1, [0, 0, 1]);
@@ -45,15 +48,19 @@ export const PLATYCOSMS: PlatycosmDef[] = [
     gens: [T(1, 0, 0), T(0.5, S3 / 2, 0), screw6], lattice: [hexA, hexB, [0, 0, 6]] },
   { id: 'c22', name: 'Didicosm', sym: 'c22', orientable: true, covolume: q,
     dom: () => boxDomain([0, 0, 0], [1, h, h]),
-    gens: [g22a, g22b, T(1, 0, 0), T(0, 1, 0), T(0, 0, 1)], lattice: [e1, e2, e3] },
+    gens: [g22a, g22b, T(1, 0, 0), T(0, 1, 0), T(0, 0, 1)], lattice: [e1, e2, e3],
+    // a midline round the long faces, so the box reads as two cubes and the half turns are easier to follow
+    extraEdges: loopX(h) },
   { id: 'a1p', name: 'First amphicosm', sym: '+a1', orientable: false, covolume: 1, dom: cube,
     gens: [glideA1Cube, T(2, 0, 0), T(0, 1, 0), T(0, 0, 1)], lattice: [[2, 0, 0], e2, e3] },
   { id: 'a1m', name: 'Second amphicosm', sym: '−a1', orientable: false, covolume: q,
     dom: () => boxDomain([0, 0, -h], [h, h, h]),
-    gens: [glideA1, T(1, 0, 0), T(0, h, h), T(0, h, -h)], lattice: [e1, [0, h, h], [0, h, -h]] },
+    gens: [glideA1, T(1, 0, 0), T(0, h, h), T(0, h, -h)], lattice: [e1, [0, h, h], [0, h, -h]],
+    extraEdges: loopZ(0) },
   { id: 'a2p', name: 'First amphidicosm', sym: '+a2', orientable: false, covolume: q,
     dom: () => boxDomain([0, 0, 0], [1, h, h]),
-    gens: [a2g1p, a2g2, T(1, 0, 0), T(0, 1, 0), T(0, 0, 1)], lattice: [e1, e2, e3] },
+    gens: [a2g1p, a2g2, T(1, 0, 0), T(0, 1, 0), T(0, 0, 1)], lattice: [e1, e2, e3],
+    extraEdges: loopX(h) },
   { id: 'a2m', name: 'Second amphidicosm', sym: '−a2', orientable: false, covolume: q,
     dom: () => boxDomain([0, 0, 0], [1, h, h]),
     gens: [a2g1m, a2g2, T(1, 0, 0), T(0, 1, 0), T(0, 0, 1)], lattice: [e1, e2, e3] },

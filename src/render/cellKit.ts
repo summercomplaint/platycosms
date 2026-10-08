@@ -9,6 +9,8 @@ import type { CrabModel } from './crab';
 /** One drawable piece of a cell: a geometry with a material, placed by `local` inside the cell. */
 export interface Part {
   kind: Kind | 'crab';
+  /** edge or vertex class (for tubes, arrows, balls) */
+  cls?: number;
   geometry: BufferGeometry;
   material: Material;
   local: Matrix4;
@@ -42,7 +44,7 @@ export function buildKit(R: Analysis, opts: KitOptions): CellKit {
     } else {
       material = new MeshStandardMaterial({ color: new Color(vertColor(g.cls)), roughness: 0.3, metalness: 0 });
     }
-    parts.push({ kind: g.kind, geometry, material, local: I });
+    parts.push({ kind: g.kind, cls: g.cls, geometry, material, local: I });
   }
 
   const D = R.spec.dom();

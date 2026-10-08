@@ -14,4 +14,6 @@ export interface Spec {
   orientable: boolean;
   /** Volume of R^3 / Gamma. */
   covolume: number;
+  /** Extra segments to draw on the boundary of the domain (closed up under the gluings by the analysis). */
+  extraEdges?: [Vec3, Vec3][];
 }

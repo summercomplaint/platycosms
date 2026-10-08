@@ -1,0 +1,1 @@
+Press one to watch every copy of the cell move by that map. The whole tiling lands on itself, each crab where another one was. Together these maps generate every way of moving the cell onto another copy of itself.

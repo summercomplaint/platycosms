@@ -9,11 +9,13 @@ Style follows Greg Egan's "Loops Across Space" coloured-cylinder figure. Math so
 
 ## Decisions (from the user)
 - Standalone static site, TypeScript (Vite + three + vitest). Raw HTML kept only as backup: `legacy/platycosms-v1.html`.
-- Edge direction shown with arrowheads (colour alone cannot tell c1 from c2). Since phase 8: tubes **opaque** and bright (like legacy), arrows **long** (4.2 r, flare 1.85 r) in a lighter tint of the tube colour, always on (no toggle).
-- Look (phase 8): space theme. Black, white, bright green (#3dff7a). **No grey text**, ever; hierarchy by size, weight, green. No light theme. Fonts: Space Grotesk, JetBrains Mono (Fontsource, bundled).
+- Edge direction shown with arrowheads (colour alone cannot tell c1 from c2). Since phase 9: tubes opaque, thin (0.03 L); the tube stops at each arrowhead's base and restarts at its tip so the whole cone shows ("—▶—"); arrows 0.17 L long, flare 0.075 L, lighter tint of the tube colour, always on.
+- Look (phase 8): space theme, plus (phase 9) a light mode toggle at the lower right of the stage (white, no stars, class-0 balls black). Black, white, bright green (#3dff7a). **No grey text**, ever; hierarchy by size, weight, green. No light theme. Fonts: Space Grotesk, JetBrains Mono (Fontsource, bundled).
 - Egan's trick: add extra edges (seams) so no face is glued to itself only partly.
-- Inside view (camera in the cell, copies around it). A fiddler crab (user's model, CC BY-NC) at the centre of every cell, both views. Since phase 8: recoloured (blue body, red big claw, white eyes, an R decal on back and belly), scale 0.5 x inradius. The user rejected an RGB axis triad (it would clash with the tube colours).
+- Inside view (camera in the cell, copies around it). A fiddler crab (user's model, CC BY-NC) at the centre of every cell, both views. Since phase 9: teal body, big claw graded teal to coral, white eyes, coral R decal on back and belly, scale 0.5 x inradius. No crab colour may be an edge colour (teal was removed from the edge palette; Egan's red stays, the claw is coral instead). The user rejected an RGB axis triad (it would clash with the tube colours).
 - Animation (since phase 8): one per **face pairing** (the gluing maps, which generate the group); the ghost lands flush against the partner face, and stops at the end (no loop). In the inside view the whole tiling moves onto itself. (Before: 3 chosen generators, which for c22 sent the ghost somewhere not adjacent.)
+- Page prose lives in `content/` (one Markdown-lite file per piece, see content/README.md) so the user can edit it directly. Maths terms in "More details" link to Wikipedia.
+- Gluing controls: click a gluing to play it (again to replay), "Clear ghost" to remove it. No slider.
 - Mapping torus: not a badge. It is the way in: each description (`story` in facts.ts) uses the mapping torus picture to explain the space. Audience: someone who has never heard of platycosms, without talking down to mathematicians. List the orientable double cover for non-orientable ones. Put as much of the paper's content as is useful on the page.
 - No edge/vertex lists, no cell-face fill, no rotate toggle (removed in phase 8). +a1 is drawn as a cube (only +a1; the user chose not to change the other 1 x ½ x ½ boxes).
 - Everything pushed to https://github.com/summercomplaint/platycosms (public). No Pages deployment unless asked.
@@ -27,6 +29,7 @@ Style follows Greg Egan's "Loops Across Space" coloured-cylinder figure. Math so
 - [x] 5. Inside view + fiddler crab
 - [x] 6. Symmetry animation (3 generators; ghost copy outside, whole tiling inside)
 - [x] 7. CI, README, final push (CI green on the first run)
+- [x] 9. Second review: thin tubes with a gap at each arrowhead, crab teal with a teal-to-coral claw, midlines on c22/−a1/+a2, Clear ghost, light mode, text in content/, Wikipedia links, one "More details"
 - [x] 8. Redesign after user review: space theme, opaque tubes and long arrows, recoloured crab with R, face-pairing animations, newcomer text, +a1 cube
 
 ## Log

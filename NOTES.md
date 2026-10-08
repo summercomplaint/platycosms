@@ -176,10 +176,10 @@ Tests (`tests/group.test.ts`) check that our lattice bases are exactly the trans
 and (`tests/analyze.test.ts`) that each chosen fundamental domain tiles space exactly once.
 
 Class counts of the cell structure on our domains (computed): V, E, F per platycosm (vertex, edge, face classes; V−E+F−1 = 0 in every case):
-c1 1,3,3; c2 1,3,3; c3 2,5,4; c4 1,3,3; c6 2,5,4; c22 2,5,4; +a1 1,3,3; −a1 2,5,4; +a2 2,5,4; −a2 2,6,5. These depend on the chosen domain and seams, not on the manifold.
-Egan's picture of the didicosm has 6 edge colours; ours has 5 (a different, equally valid cell structure).
+c1 1,3,3; c2 1,3,3; c3 2,5,4; c4 1,3,3; c6 2,5,4; c22 2,6,5; +a1 1,3,3; −a1 2,6,5; +a2 2,6,5; −a2 2,6,5. These depend on the chosen domain and seams, not on the manifold.
+Since 2026-10-08 c22, −a1 and +a2 also get a midline round their long faces (`extraEdges` in platycosms.ts, closed up under the gluings; −a2 already had one from its seams). With it c22 has 6 edge colours, like Egan's picture (before: 5).
 
-## 8a. The page text (src/data/facts.ts `story`)
+## 8a. The page text (the files in `content/`)
 
 The descriptions restate facts above; nothing new is claimed except:
 

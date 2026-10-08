@@ -1,0 +1,1 @@
+Press one to watch a copy of the cell move by that map. It lands against the face it is glued to, and colours and arrows match across it. Together these maps generate every way of moving the cell onto another copy of itself.
