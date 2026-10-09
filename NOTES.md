@@ -109,6 +109,8 @@ Notation: (2T) circle of 2-sided tori, (2K) circle of 2-sided Klein bottles, [1K
 | +a2 | [+1gsK (2K) +1gsK]^1 ; (2K)^1, [∓1sK (2T) ∓1gT]^1 |
 | −a2 | [−1gT (2T) −1sK]^1 ; (2K)^1, [∓1sK (2T) ∓1gT]^1 |
 
+The page (`surfaces` in `src/data/facts.ts`) shows these in words: `(2T)`/`(2K)` is "a looping family of two-sided tori / Klein bottles", `[x (2T) y]` is "a family of two-sided tori running between" the one-sided surfaces x and y, and the exponent is the count. It leaves out the first/second-return signs, the g/s tags and the basal/perpendal split (since 2026-10-09).
+
 Footnote: for ±a2 the prose on p.18 describes the perpendal interval as [1sK (2T) 1gK] while Table 4 (p.19) has [∓1sK (2T) ∓1gT]; we follow the table.
 
 ## 5. Double covers [paper §8, Table 8, p.28–30]
@@ -180,6 +182,8 @@ c1 1,3,3; c2 1,3,3; c3 2,5,4; c4 1,3,3; c6 2,5,4; c22 2,6,5; +a1 1,3,3; −a1 2,
 Since 2026-10-08 c22, −a1 and +a2 also get a midline round their long faces (`extraEdges` in platycosms.ts, closed up under the gluings; −a2 already had one from its seams). With it c22 has 6 edge colours, like Egan's picture (before: 5).
 
 ## 8a. The page text (the files in `content/`)
+
+The details panel does not show the injectivity radius or diameter (§7) since 2026-10-09: they need the paper's shape parameters, which the page does not explain. The data stays in `facts.ts`.
 
 The descriptions restate facts above; nothing new is claimed except:
 

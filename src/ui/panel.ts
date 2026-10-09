@@ -46,16 +46,14 @@ export function renderPanel(el: HTMLElement, stage: Stage, mode: Mode): void {
         ${row(wiki('H₁', 'Homology_(mathematics)'), F.h1)}
         ${row(wiki('Holonomy', 'Holonomy'), `order ${F.holonomyOrder} (${wiki('point group', 'Crystallographic_point_group')} ${F.pointGroup})`)}
         ${row(wiki('Space group', 'List_of_space_groups'), F.spaceGroup)}
-        ${row(`${wiki('Wolf', 'Joseph_A._Wolf')}'s name`, F.wolf)}
+        ${row("Wolf's name", F.wolf)}
         ${row(wiki('π₁', 'Fundamental_group'), esc(F.pi1))}
         ${row('Shape parameters', String(F.shapeParameters))}
-        ${row(wiki('Seifert fibrations', 'Seifert_fiber_space'), esc(F.seifert.map((s) => `${s.count}: ${s.type}`).join('; ')))}
+        ${row(wiki('Seifert fibrations', 'Seifert_fiber_space'), `${esc(F.seifert.map((s) => `${s.count}: ${s.type}`).join('; '))} (${wiki('notation', 'Orbifold_notation')})`)}
         ${row('Flat surfaces', esc(F.surfaces))}
         ${row(wiki('Bravais types', 'Bravais_lattice'), String(F.bravaisTypes))}
-        ${row(`${wiki('Injectivity radius', 'Injectivity_radius')}²`, esc(F.injectivityRadiusSq))}
-        ${row(`${wiki('Diameter', 'Diameter')}²`, esc(F.diameterSq))}
       </dl>
-      <p class="small">A, B, C, D are the shape parameters of Conway and Rossetti's paper, where the rest of these come from. Every fact is sourced in NOTES.md in the repository.</p>
+      <p class="small">For further details, reference NOTES.md in the repository.</p>
     </section>`;
 
   // the gluing buttons: hover highlights the faces, a click plays the map from the start

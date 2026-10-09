@@ -31,7 +31,7 @@ export interface Facts {
   metachiral: boolean;
   /** Seifert fibrations (Table 3) */
   seifert: SeifertFibration[];
-  /** parallel families of embedded flat surfaces (Table 4) in the paper's notation */
+  /** parallel families of embedded flat surfaces (Table 4), unpacked into words; the paper's notation is in NOTES.md section 4 */
   surfaces: string;
   /** the orientable double cover, for non-orientable spaces (section 3 and Table 8) */
   orientableDoubleCover?: string;
@@ -57,7 +57,7 @@ const BASE: Facts[] = [
     pointGroup: '1', holonomyOrder: 1, shapeParameters: 6, h1: 'ℤ³', b1: 3,
     pi1: '⟨X, Y, Z | X, Y, Z commute⟩', metachiral: false,
     seifert: [{ count: 'infinitely many', type: '∘' }],
-    surfaces: '(2T)^∞', doubleCovers: { total: 7, types: 'all torocosms' }, bravaisTypes: 14,
+    surfaces: 'Infinitely many looping families of two-sided tori.', doubleCovers: { total: 7, types: 'all torocosms' }, bravaisTypes: 14,
     injectivityRadiusSq: 'the minimal vonorm of the lattice', diameterSq: 'see paper section 10',
     mappingTorus: { is: true, text: 'Yes. Every horizontal slice is a torus, and going up through the cell brings it back unchanged.' },
     product: 'Yes: T² × S¹ (= S¹ × S¹ × S¹)',
@@ -68,7 +68,7 @@ const BASE: Facts[] = [
     pointGroup: '22', holonomyOrder: 2, shapeParameters: 4, h1: 'ℤ × (ℤ/2)²', b1: 1,
     pi1: '⟨X, Y, Z | X, Y commute; Z X Z⁻¹ = X⁻¹, Z Y Z⁻¹ = Y⁻¹⟩', metachiral: false,
     seifert: [{ count: '1', type: '2222' }, { count: 'infinitely many', type: '××' }],
-    surfaces: '(2T)^1; [1sK (2T) 1sK]^∞', doubleCovers: { total: 7, types: '1 torocosm, 6 dicosms' }, bravaisTypes: 5,
+    surfaces: 'One looping family of two-sided tori, and infinitely many families of two-sided tori that run between two one-sided Klein bottles.', doubleCovers: { total: 7, types: '1 torocosm, 6 dicosms' }, bravaisTypes: 5,
     injectivityRadiusSq: 'min(B+C, C+A, A+B, D)', diameterSq: '(B+C)(C+A)(A+B) / (4(BC+CA+AB)) + D/4',
     mappingTorus: { is: true, text: 'Yes. Every horizontal slice is a torus; going up through the cell brings it back turned by a half turn.' },
     product: null,
@@ -79,7 +79,7 @@ const BASE: Facts[] = [
     pointGroup: '33', holonomyOrder: 3, shapeParameters: 2, h1: 'ℤ × ℤ/3', b1: 1,
     pi1: '⟨X, Y, Z | X, Y commute; Z: X → Y → (XY)⁻¹⟩', metachiral: true,
     seifert: [{ count: '1', type: '333' }],
-    surfaces: '(2T)^1', doubleCovers: { total: 1, types: 'a tricosm' }, bravaisTypes: 1,
+    surfaces: 'One looping family of two-sided tori.', doubleCovers: { total: 1, types: 'a tricosm' }, bravaisTypes: 1,
     injectivityRadiusSq: 'min(2A, D)', diameterSq: '2A/3 + D/4',
     mappingTorus: { is: true, text: 'Yes. Every horizontal slice is a torus; going up through the cell brings it back turned by a third of a turn.' },
     product: null,
@@ -90,7 +90,7 @@ const BASE: Facts[] = [
     pointGroup: '44', holonomyOrder: 4, shapeParameters: 2, h1: 'ℤ × ℤ/2', b1: 1,
     pi1: '⟨X, Y, Z | X, Y commute; Z: X → Y → X⁻¹⟩', metachiral: true,
     seifert: [{ count: '1', type: '444' }],
-    surfaces: '(2T)^1', doubleCovers: { total: 3, types: '1 dicosm, 2 tetracosms' }, bravaisTypes: 1,
+    surfaces: 'One looping family of two-sided tori.', doubleCovers: { total: 3, types: '1 dicosm, 2 tetracosms' }, bravaisTypes: 1,
     injectivityRadiusSq: 'min(A, D)', diameterSq: 'A/2 + D/4',
     mappingTorus: { is: true, text: 'Yes. Every horizontal slice is a torus; going up through the cell brings it back turned by a quarter turn.' },
     product: null,
@@ -101,7 +101,7 @@ const BASE: Facts[] = [
     pointGroup: '66', holonomyOrder: 6, shapeParameters: 2, h1: 'ℤ', b1: 1,
     pi1: '⟨X, Y, Z | X, Y commute; Z: X → XY → Y⟩', metachiral: true,
     seifert: [{ count: '1', type: '632' }],
-    surfaces: '(2T)^1', doubleCovers: { total: 1, types: 'a tricosm' }, bravaisTypes: 1,
+    surfaces: 'One looping family of two-sided tori.', doubleCovers: { total: 1, types: 'a tricosm' }, bravaisTypes: 1,
     injectivityRadiusSq: 'min(2A, D)', diameterSq: '2A/3 + D/4',
     mappingTorus: { is: true, text: 'Yes. Every horizontal slice is a torus; going up through the cell brings it back turned by a sixth of a turn.' },
     product: null,
@@ -112,7 +112,7 @@ const BASE: Facts[] = [
     pointGroup: '222', holonomyOrder: 4, shapeParameters: 3, h1: '(ℤ/4)²', b1: 0,
     pi1: '⟨X, Y | X = Y² X Y², Y = X² Y X²⟩', metachiral: false,
     seifert: [{ count: '3', type: '22× (all three)' }],
-    surfaces: '[∓1sK (2T) ∓1sK]^3', doubleCovers: { total: 3, types: 'all dicosms' }, bravaisTypes: 3,
+    surfaces: 'Three families of two-sided tori, each running between two one-sided Klein bottles.', doubleCovers: { total: 3, types: 'all dicosms' }, bravaisTypes: 3,
     injectivityRadiusSq: 'min(A, B, C)', diameterSq: 'at least max(α, β, γ)/4 (see paper)',
     mappingTorus: { is: false, text: 'No. Its first homology is finite, so there is no map onto a circle to slice it along.' },
     product: null,
@@ -123,7 +123,7 @@ const BASE: Facts[] = [
     pointGroup: '*', holonomyOrder: 2, shapeParameters: 4, h1: 'ℤ² × ℤ/2', b1: 2,
     pi1: '⟨W, X, Z | Z^X = Z^W = Z⁻¹, [X, W] = 1⟩', metachiral: false,
     seifert: [{ count: '1', type: '∘' }, { count: 'infinitely many', type: '∗∗ and ××' }],
-    surfaces: '[+1gT (2T) +1gT]^1; (2K)^∞, (2T)^∞', orientableDoubleCover: 'the torocosm c1',
+    surfaces: 'One family of two-sided tori running between two one-sided tori; infinitely many looping families of two-sided Klein bottles; infinitely many looping families of two-sided tori.', orientableDoubleCover: 'the torocosm c1',
     doubleCovers: { total: 7, types: '1 torocosm, 4 first amphicosms, 2 second amphicosms' }, bravaisTypes: 5,
     injectivityRadiusSq: 'min(A+B, B+C, A+C, D)', diameterSq: '(B+C)(C+A)(A+B) / (4(BC+CA+AB)) + D/4',
     mappingTorus: { is: true, text: 'Yes. Slices across the left–right direction are tori; going across brings the torus back reflected.' },
@@ -135,7 +135,7 @@ const BASE: Facts[] = [
     pointGroup: '*', holonomyOrder: 2, shapeParameters: 4, h1: 'ℤ²', b1: 2,
     pi1: '⟨W, X, Z | Z^X = Z^W = Z⁻¹, [X, W] = Z⟩', metachiral: false,
     seifert: [{ count: '1', type: '∘' }, { count: 'infinitely many', type: '∗× and ××' }],
-    surfaces: '[−1gT (2T) −1gT]^1; (2K)^∞, (2T)^∞', orientableDoubleCover: 'the torocosm c1',
+    surfaces: 'One family of two-sided tori running between two one-sided tori; infinitely many looping families of two-sided Klein bottles; infinitely many looping families of two-sided tori.', orientableDoubleCover: 'the torocosm c1',
     doubleCovers: { total: 3, types: '1 torocosm, 2 first amphicosms' }, bravaisTypes: 5,
     injectivityRadiusSq: 'min(A+B, A+C, B+C+D, 4D, 4(B+C))', diameterSq: 'a long case analysis, see paper section 9',
     mappingTorus: { is: true, text: 'Yes. Slices across the left–right direction are tori; going across brings the torus back reflected, by a reflection that swaps its two generating loops.' },
@@ -147,7 +147,7 @@ const BASE: Facts[] = [
     pointGroup: '*22', holonomyOrder: 4, shapeParameters: 3, h1: 'ℤ × (ℤ/2)²', b1: 1,
     pi1: '⟨W, X, Z | Z^W = Z^X = Z⁻¹, X^W = X⁻¹⟩', metachiral: false,
     seifert: [{ count: '3', type: '22∗, ∗∗, ××' }],
-    surfaces: '[+1gsK (2K) +1gsK]^1; (2K)^1, [∓1sK (2T) ∓1gT]^1', orientableDoubleCover: 'the dicosm c2',
+    surfaces: 'One family of two-sided Klein bottles running between two one-sided Klein bottles; one looping family of two-sided Klein bottles; one family of two-sided tori running between a one-sided Klein bottle and a one-sided torus.', orientableDoubleCover: 'the dicosm c2',
     doubleCovers: { total: 7, types: '1 dicosm, 2 first amphicosms, 2 first amphidicosms, 2 second amphidicosms' }, bravaisTypes: 1,
     injectivityRadiusSq: 'min(A, B, C)', diameterSq: '(A+B+C)/4',
     mappingTorus: { is: true, text: 'Yes. Its slices are Klein bottles; going around brings the Klein bottle back by a twisted symmetry.' },
@@ -159,7 +159,7 @@ const BASE: Facts[] = [
     pointGroup: '*22', holonomyOrder: 4, shapeParameters: 3, h1: 'ℤ × ℤ/4', b1: 1,
     pi1: '⟨W, X, Z | Z^W = Z^X = Z⁻¹, X^W = X⁻¹ Z⟩', metachiral: false,
     seifert: [{ count: '3', type: '22×, ∗×, ××' }],
-    surfaces: '[−1gT (2T) −1sK]^1; (2K)^1, [∓1sK (2T) ∓1gT]^1', orientableDoubleCover: 'the dicosm c2',
+    surfaces: 'One family of two-sided tori running between a one-sided torus and a one-sided Klein bottle; one looping family of two-sided Klein bottles; one family of two-sided tori running between a one-sided Klein bottle and a one-sided torus.', orientableDoubleCover: 'the dicosm c2',
     doubleCovers: { total: 3, types: '1 dicosm, 2 first amphicosms' }, bravaisTypes: 1,
     injectivityRadiusSq: 'min(A, B, 4C)', diameterSq: 'at least max(β, γ)/4 (see paper)',
     mappingTorus: { is: true, text: 'Yes. Its slices are Klein bottles; going around brings the Klein bottle back by a twisted symmetry.' },
