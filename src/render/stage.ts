@@ -8,7 +8,7 @@ import { analyze, Analysis } from '../math/analyze';
 import { Gamma } from '../math/group';
 import { pairings, Pairing } from '../math/gluing';
 import { PlatycosmDef } from '../data/platycosms';
-import { IDENTITY, Iso, apply, compose, det, inverse, key } from '../math/iso';
+import { IDENTITY, Iso, apply, compose, inverse } from '../math/iso';
 import { Vec3 } from '../math/vec';
 import { Animator } from './animation';
 import { CellKit, Part, buildKit, v3 } from './cellKit';
@@ -67,7 +67,7 @@ export class Stage {
   private lastTilePos = new Vector3(Infinity, 0, 0);
   private tilesDirty = true;
   private animRun = -1;
-  private animCell: Iso = IDENTITY;
+  private walk: { from: Vector3; to: Vector3; done: number } | null = null;
 
   private last = performance.now();
   /** ?stopAfter=N stops the render loop after N frames once the crab has loaded (for headless screenshots) */
@@ -111,6 +111,8 @@ export class Stage {
   setMode(m: Mode): void {
     if (m === this.mode) return;
     this.mode = m;
+    this.anim.stop(); // a ghost outside is not a walk inside, and the other way round
+    this.hoverPolys = null;
     this.rebuild();
   }
 
@@ -284,7 +286,9 @@ export class Stage {
     this.fp.apply();
     this.lastTilePos.set(Infinity, 0, 0);
     this.tilesDirty = true;
-    this.animRun = -1; // a gluing already showing is replayed on the cell you start in
+    // the view is rebuilt when the crab arrives: a gluing in progress is walked again from the start
+    this.animRun = -1;
+    this.walk = null;
   }
 
   private tileRadius(e: Entry): number { return 3.3 * e.L; }
@@ -298,18 +302,32 @@ export class Stage {
   }
 
   /**
-   * Inside view: the gluing is played on the copy of the cell you are in, h(D), so it is h γ h⁻¹.
-   * (Played about the original cell, it would fling everything near you further the further you had walked.)
-   * `end` is the whole map; once it has run the tiling is back on itself, so then nothing moves (null).
+   * Inside view: a gluing is a way of moving, so the tiling stays put and you walk. For the cell you are in, h(D),
+   * the gluing is h γ h⁻¹; you go in a straight line, without turning, from p to h γ h⁻¹(p), through the shared face
+   * into the neighbouring copy. Arriving there you see the world turned (a screw) or mirrored (a glide): the holonomy.
+   * The walk adds its step to the camera each frame, so you can still fly about while it runs.
    */
-  private insideAnim(e: Entry): { M: Matrix4; end: Iso } | null {
+  private stepWalk(e: Entry): void {
     const a = this.anim, p = a.gen === null ? undefined : e.pairs[a.gen];
-    if (!p) return null;
-    if (a.runs !== this.animRun) { this.animRun = a.runs; this.animCell = this.cellAt(e); }
-    if (a.tau <= 0 || a.tau >= 1) return null;
-    const h = this.animCell;
-    const M = toMatrix4(h).multiply(isoPath(p.gamma)(a.eased)).multiply(toMatrix4(inverse(h)));
-    return { M, end: compose(h, compose(p.gamma, inverse(h))) };
+    if (!p) return;
+    if (a.runs !== this.animRun) {
+      this.animRun = a.runs;
+      const h = this.cellAt(e), from = this.fp.pos.clone();
+      this.walk = { from, to: v3(apply(compose(h, compose(p.gamma, inverse(h))), [from.x, from.y, from.z])), done: 0 };
+    }
+    const w = this.walk;
+    if (!w || a.eased === w.done) return;
+    this.fp.pos.addScaledVector(w.to.clone().sub(w.from), a.eased - w.done);
+    w.done = a.eased;
+  }
+
+  /** Inside view: go back to where the last walk started, and end it. */
+  walkBack(): void {
+    if (this.walk) this.fp.pos.copy(this.walk.from);
+    this.walk = null;
+    this.anim.stop();
+    this.fp.apply();
+    this.tilesDirty = true;
   }
 
   /** the copy of the cell whose centre is nearest the camera */
@@ -327,22 +345,9 @@ export class Stage {
   private refreshTiles(): void {
     const e = this.entry;
     if (!e || !this.tiles) return;
-    const A = this.insideAnim(e);
-    const R = this.tileRadius(e);
-    const c = e.kit.centroid, p: Vec3 = [this.fp.pos.x, this.fp.pos.y, this.fp.pos.z];
-    let els: Iso[];
-    if (!A) els = e.gamma.near(c, p, R);
-    else if (det(A.end) > 0) {
-      // a screw path is rigid all the way: draw the copies that it brings near the camera
-      const q = this.fp.pos.clone().applyMatrix4(A.M.clone().invert());
-      els = e.gamma.near(c, [q.x, q.y, q.z], R);
-    } else {
-      // a glide path squashes through its mirror, so it has no inverse half way: take the copies near the camera at the start and at the end
-      const seen = new Map<string, Iso>();
-      for (const q of [p, apply(inverse(A.end), p)]) for (const g of e.gamma.near(c, q, R + 1.3 * e.L)) seen.set(key(g), g);
-      els = [...seen.values()];
-    }
-    const mats = els.map((g) => (A ? A.M.clone() : new Matrix4()).multiply(toMatrix4(g)));
+    const c = e.kit.centroid;
+    const els = e.gamma.near(c, [this.fp.pos.x, this.fp.pos.y, this.fp.pos.z], this.tileRadius(e));
+    const mats = els.map(toMatrix4);
     const crabR = 1.8 * e.L, cv = new Vector3(c[0], c[1], c[2]);
     const centers = mats.map((m) => cv.clone().applyMatrix4(m));
     const { crab } = this.options;
@@ -371,9 +376,10 @@ export class Stage {
       this.updateGhost();
       this.updateHighlight();
     } else if (this.entry) {
+      this.stepWalk(this.entry);
       const moved = this.fp.update(dt);
       const far = this.fp.pos.distanceTo(this.lastTilePos) > 0.12 * this.entry.L;
-      if (moved || far || this.tilesDirty || this.anim.gen !== null) this.refreshTiles();
+      if (moved || far || this.tilesDirty || this.anim.playing) this.refreshTiles();
     }
     this.renderer.render(this.scene, this.camera);
     this.onFrame?.();

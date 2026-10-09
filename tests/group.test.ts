@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { PLATYCOSMS } from '../src/data/platycosms';
 import { Gamma, enumerate } from '../src/math/group';
-import { Iso, apply, compose, key, screwOf } from '../src/math/iso';
+import { IDENTITY, Iso, apply, compose, inverse, key, screwOf } from '../src/math/iso';
+import { inClosed } from '../src/math/domain';
 import { Vec3, dist, mean } from '../src/math/vec';
 import { analyze } from '../src/math/analyze';
 import { pairings } from '../src/math/gluing';
@@ -60,6 +61,33 @@ describe('screw decomposition reproduces the isometry', () => {
     const g = pairGammas(PLATYCOSMS[5])[0];
     expect(key(compose(g, g))).toBeTruthy();
   });
+});
+
+describe('inside view: a gluing walks you from your cell into the neighbouring copy across the face', () => {
+  for (const P of PLATYCOSMS) {
+    it(P.id, () => {
+      const D = P.dom(), pairs = pairings(analyze(P, { samples: 0 }));
+      const c = mean(D.V), q = c.map((v, i) => v + 0.05 * (i + 1)) as Vec3; // a point inside the cell, off its centre
+      expect(inClosed(D, q)).toBe(true);
+      // the cell you are in: the original, or a copy of it further away
+      for (const h of [IDENTITY, ...P.gens, compose(P.gens[0], P.gens[P.gens.length - 1])]) {
+        for (const pr of pairs) {
+          const g = pr.gamma, hg = compose(h, g);
+          const end = apply(compose(hg, inverse(h)), apply(h, q)); // what Stage.stepWalk walks to
+          // you arrive in the copy hγ(D), at the matching point...
+          expect(inClosed(D, apply(inverse(hg), end))).toBe(true);
+          expect(dist(apply(inverse(hg), end), q)).toBeLessThan(1e-9);
+          // ...and that copy shares face b with your cell h(D)
+          // (polys alternate: the part of face a, then its image on face b)
+          for (const { poly } of pr.polys.filter((_, i) => i % 2 === 1)) {
+            const m = mean(poly);
+            expect(inClosed(D, m)).toBe(true);
+            expect(inClosed(D, apply(inverse(g), m))).toBe(true);
+          }
+        }
+      }
+    });
+  }
 });
 
 describe('analysis still passes with the full enumeration', () => {

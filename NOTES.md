@@ -210,6 +210,7 @@ The descriptions restate facts above; nothing new is claimed except:
 - "A hexagon with opposite sides glued is a torus": **[literature]**, standard.
 - −a1 is "the mapping torus of the other kind of reflection, one that swaps the torus's two generating loops": the non-split reflection of §2 **[computed]** (the swap matrix in GL₂(ℤ)).
 - Mirror-image crab after a non-orientable trip: what non-orientable means; each such platycosm has a gluing map with det −1 **[computed]**.
+- Inside view (since 2026-10-09): a gluing is a walk, not a motion of the tiling. From p in the cell h(D) you go in a straight line, without turning, to hγh⁻¹(p), which lies in the neighbouring copy hγ(D) across the glued face **[computed]**, `tests/group.test.ts`. The view on arrival is the start view turned or mirrored by the linear part of γ: walking without turning is parallel transport, and in a flat manifold the holonomy of a loop is the linear part of its deck transformation **[literature]**.
 - The face-pairing maps of a fundamental polyhedron generate the group (Poincaré polyhedron theorem) **[literature]**, and checked for our domains **[computed]** in `tests/group.test.ts`.
 
 ## 9. Open questions / things to double-check

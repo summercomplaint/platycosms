@@ -75,8 +75,10 @@ export function renderPanel(el: HTMLElement, stage: Stage, mode: Mode): void {
   });
   // the Clear button lives in the view (index.html); set with onclick so re-rendering does not stack handlers
   const clear = document.getElementById('aClear') as HTMLButtonElement;
-  clear.textContent = mode === 'outside' ? 'Clear ghost' : 'Reset tiling';
-  clear.onclick = () => { stage.anim.stop(); stage.highlight(null); stage.applyOptions(); };
+  clear.textContent = mode === 'outside' ? 'Clear ghost' : 'Walk back';
+  clear.onclick = mode === 'outside'
+    ? () => { stage.anim.stop(); stage.highlight(null); stage.applyOptions(); }
+    : () => stage.walkBack();
   stage.onFrame = () => {
     const a = stage.anim;
     btns.forEach((b) => b.setAttribute('aria-pressed', String(a.gen === Number(b.dataset.pair))));
