@@ -125,4 +125,6 @@ footer { font-size: .84rem; max-width: 120ch; }
   nav { flex-wrap: nowrap; overflow-x: auto; margin-inline: -16px; padding: 2px 16px 6px; scroll-padding-inline: 16px; scroll-snap-type: x proximity; scrollbar-width: none; overscroll-behavior-x: contain; }
   nav::-webkit-scrollbar { display: none; }
   nav button { flex: none; scroll-snap-align: start; }
+  /* the inside-view key hint is no use without a keyboard */
+  .hint { display: none; }
 }
