@@ -20,4 +20,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: platycosms-single-file
-          path: dist-single/index.html
+          path: dist-single/

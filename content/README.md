@@ -7,7 +7,7 @@ Every piece of prose on the page lives in this folder, one small file per piece.
 - Paragraphs are separated by a blank line.
 - `**bold**`, `*italic*`, and links: `[Klein bottle](https://en.wikipedia.org/wiki/Klein_bottle)`.
 - Links to another platycosm use its id after a #: `[the torocosm](#c1)` switches the page to it.
-- Links to a figure use `figure:` and its name: `[this diagram](figure:proof)` opens it over the page. The figures are listed in `src/ui/figures.ts`.
+- Images in `public/` can be linked by file name: `[this diagram](figure-33.png)` opens it in a new tab.
 - That is all. Anything else (HTML, headings) shows up as plain text.
 
 ## Files

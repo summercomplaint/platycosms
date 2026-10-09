@@ -15,7 +15,7 @@ npm install
 npm run dev            # local dev server
 npm test               # tiling, Euler characteristic, closed meshes, facts vs generators
 npm run build          # static site in dist/
-npm run build:single   # one self-contained file: dist-single/index.html (about 3 MB), works from disk or any web host
+npm run build:single   # dist-single/index.html (about 3 MB, everything inlined) plus figure-33.png: upload both
 ```
 Routes: `#c22`, `#c22/inside`, `#c22/outside/anim2@0.5` (gluing 2, paused half way). Spaces: `c1 c2 c3 c4 c6 c22 a1p a1m a2p a2m`.
 An earlier single-file version is kept in `legacy/platycosms-v1.html`. Progress and plans are in [`PROGRESS.md`](PROGRESS.md).

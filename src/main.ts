@@ -8,7 +8,6 @@ import { Stage, Mode } from './render/stage';
 import { renderPanel } from './ui/panel';
 import { content } from './content';
 import { paragraphs } from './ui/markdown';
-import { setupFigures } from './ui/figures';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -17,8 +16,6 @@ let current: PlatycosmDef = PLATYCOSMS[5];
 let mode: Mode = 'outside';
 
 $('intro').innerHTML = content.intro().map((s) => `<div>${paragraphs(s)}</div>`).join('');
-setupFigures();
-
 /* ---------- tabs ---------- */
 const tabs = $('tabs');
 for (const P of PLATYCOSMS) {
@@ -75,7 +72,7 @@ window.addEventListener('hashchange', () => {
 $('mOut').addEventListener('click', () => go(current.id, 'outside'));
 $('mIn').addEventListener('click', () => go(current.id, 'inside'));
 window.addEventListener('keydown', (e) => {
-  if (mode !== 'outside' || (e.target as HTMLElement).closest('input, dialog')) return;
+  if (mode !== 'outside' || (e.target as HTMLElement).closest('input')) return;
   const i = PLATYCOSMS.indexOf(current);
   if (e.key === 'ArrowRight') go(PLATYCOSMS[(i + 1) % PLATYCOSMS.length].id, mode);
   if (e.key === 'ArrowLeft') go(PLATYCOSMS[(i + PLATYCOSMS.length - 1) % PLATYCOSMS.length].id, mode);

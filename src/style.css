@@ -114,17 +114,6 @@ canvas:active { cursor: grabbing; }
 
 .story a, .intro a, dt a { color: inherit; text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
 .story a:hover, .intro a:hover, dt a:hover { color: var(--accent); }
-/* [text](figure:name) in the page text: a button that looks like the links around it, opening a figure dialog */
-.figlink { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 2px; }
-.figlink:hover { color: var(--accent); }
-dialog.figure { max-width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 40px 18px 18px; background: var(--bg); color: var(--fg); border: 1px solid var(--accent); border-radius: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); }
-dialog.figure::backdrop { background: rgba(0, 0, 0, .6); }
-dialog.figure figure { margin: 0; display: grid; gap: 12px; }
-/* the figure is black on white, as in the paper; it keeps its white card in dark mode */
-dialog.figure img { display: block; width: 100%; height: auto; background: #fff; border-radius: 6px; padding: 12px; box-sizing: border-box; }
-dialog.figure figcaption { font-size: .9rem; }
-dialog.figure .close { position: absolute; top: 4px; right: 8px; font: inherit; font-size: 1.5rem; line-height: 1; background: none; border: 0; color: var(--fg); cursor: pointer; padding: 4px 8px; }
-dialog.figure .close:hover { color: var(--accent); }
 dl { display: grid; grid-template-columns: auto 1fr; gap: 5px 16px; margin: 0; font-size: .9rem; }
 dt { font-weight: 700; }
 dd { margin: 0; overflow-wrap: anywhere; }
