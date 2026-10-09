@@ -17,9 +17,8 @@ const e1: Vec3 = [1, 0, 0], e2: Vec3 = [0, 1, 0], e3: Vec3 = [0, 0, 1];
 const hexA: Vec3 = [1, 0, 0], hexB: Vec3 = [0.5, S3 / 2, 0];
 const hexPrism = () => prismDomain(6, 1 / S3, 30, -h, h);
 const cube = () => boxDomain([-h, -h, -h], [h, h, h]);
-/** a loop of four segments around a box, across its long faces: x = c on the box [0,1]x[0,h]x[0,h], or z = c on [0,h]x[0,h]x[-h,h] */
+/** a loop of four segments x = c around a box with cross-section [0,h]x[0,h], across its long faces */
 const loopX = (c: number): [Vec3, Vec3][] => [[[c, 0, 0], [c, h, 0]], [[c, h, 0], [c, h, h]], [[c, h, h], [c, 0, h]], [[c, 0, h], [c, 0, 0]]];
-const loopZ = (c: number): [Vec3, Vec3][] => [[[0, 0, c], [h, 0, c]], [[h, 0, c], [h, h, c]], [[h, h, c], [0, h, c]], [[0, h, c], [0, 0, c]]];
 
 // Generators follow Conway & Rossetti, Table 12 (translation lattice Z^3 unless noted).
 const screw2 = diag(-1, -1, 1, [0, 0, 1]);
@@ -28,7 +27,8 @@ const screw3 = screwZ(120, 1);
 const screw6 = screwZ(60, 1);
 const g22a = diag(-1, 1, -1, [0, h, h]);
 const g22b = diag(1, -1, -1, [h, 0, 0]);
-const glideA1 = diag(1, 1, -1, [h, 0, 0]);
+// -a1 with x and z swapped, so that its box is long left to right like the others
+const glideA1m = diag(-1, 1, 1, [0, 0, h]);
 // +a1 stretched by 2 along x so that its cell is a cube (the shape is a free parameter; it is the same platycosm)
 const glideA1Cube = diag(1, 1, -1, [1, 0, 0]);
 const a2g1p = diag(-1, 1, 1, [0, 0, h]);
@@ -54,9 +54,9 @@ export const PLATYCOSMS: PlatycosmDef[] = [
   { id: 'a1p', name: 'First amphicosm', sym: '+a1', orientable: false, covolume: 1, dom: cube,
     gens: [glideA1Cube, T(2, 0, 0), T(0, 1, 0), T(0, 0, 1)], lattice: [[2, 0, 0], e2, e3] },
   { id: 'a1m', name: 'Second amphicosm', sym: '−a1', orientable: false, covolume: q,
-    dom: () => boxDomain([0, 0, -h], [h, h, h]),
-    gens: [glideA1, T(1, 0, 0), T(0, h, h), T(0, h, -h)], lattice: [e1, [0, h, h], [0, h, -h]],
-    extraEdges: loopZ(0) },
+    dom: () => boxDomain([-h, 0, 0], [h, h, h]),
+    gens: [glideA1m, T(0, 0, 1), T(h, h, 0), T(-h, h, 0)], lattice: [e3, [h, h, 0], [-h, h, 0]],
+    extraEdges: loopX(0) },
   { id: 'a2p', name: 'First amphidicosm', sym: '+a2', orientable: false, covolume: q,
     dom: () => boxDomain([0, 0, 0], [1, h, h]),
     gens: [a2g1p, a2g2, T(1, 0, 0), T(0, 1, 0), T(0, 0, 1)], lattice: [e1, e2, e3],

@@ -138,7 +138,7 @@ const BASE: Facts[] = [
     surfaces: 'One family of two-sided tori running between two one-sided tori; infinitely many looping families of two-sided Klein bottles; infinitely many looping families of two-sided tori.', orientableDoubleCover: 'the torocosm c1',
     doubleCovers: { total: 3, types: '1 torocosm, 2 first amphicosms' }, bravaisTypes: 5,
     injectivityRadiusSq: 'min(A+B, A+C, B+C+D, 4D, 4(B+C))', diameterSq: 'a long case analysis, see paper section 9',
-    mappingTorus: { is: true, text: 'Yes. Slices across the left–right direction are tori; going across brings the torus back reflected, by a reflection that swaps its two generating loops.' },
+    mappingTorus: { is: true, text: 'Yes. Every horizontal slice is a torus; going up through the cell brings it back reflected, by a reflection that swaps its two generating loops.' },
     product: null,
     sources: src({ mappingTorus: 'computed', product: 'computed', b1: 'computed', h1: 'paper', pi1: 'paper', seifert: 'paper', surfaces: 'paper', orientableDoubleCover: 'paper', doubleCovers: 'paper' }),
   },
