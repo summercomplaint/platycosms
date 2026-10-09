@@ -8,6 +8,7 @@ import { analyze, Analysis } from '../math/analyze';
 import { Gamma } from '../math/group';
 import { pairings, Pairing } from '../math/gluing';
 import { PlatycosmDef } from '../data/platycosms';
+import { IDENTITY, Iso, apply, compose, det, inverse, key } from '../math/iso';
 import { Vec3 } from '../math/vec';
 import { Animator } from './animation';
 import { CellKit, Part, buildKit, v3 } from './cellKit';
@@ -65,6 +66,8 @@ export class Stage {
   private tiles: TileField | null = null;
   private lastTilePos = new Vector3(Infinity, 0, 0);
   private tilesDirty = true;
+  private animRun = -1;
+  private animCell: Iso = IDENTITY;
 
   private last = performance.now();
   /** ?stopAfter=N stops the render loop after N frames once the crab has loaded (for headless screenshots) */
@@ -281,11 +284,12 @@ export class Stage {
     this.fp.apply();
     this.lastTilePos.set(Infinity, 0, 0);
     this.tilesDirty = true;
+    this.animRun = -1; // a gluing already showing is replayed on the cell you start in
   }
 
   private tileRadius(e: Entry): number { return 3.3 * e.L; }
 
-  /** the path of the gluing map being animated, if any */
+  /** the path of the gluing map being animated, if any (outside view: the cell itself) */
   private animMatrix(e: Entry): Matrix4 | null {
     const a = this.anim;
     if (a.gen === null || a.tau <= 0) return null;
@@ -293,15 +297,52 @@ export class Stage {
     return p ? isoPath(p.gamma)(a.eased) : null;
   }
 
+  /**
+   * Inside view: the gluing is played on the copy of the cell you are in, h(D), so it is h γ h⁻¹.
+   * (Played about the original cell, it would fling everything near you further the further you had walked.)
+   * `end` is the whole map; once it has run the tiling is back on itself, so then nothing moves (null).
+   */
+  private insideAnim(e: Entry): { M: Matrix4; end: Iso } | null {
+    const a = this.anim, p = a.gen === null ? undefined : e.pairs[a.gen];
+    if (!p) return null;
+    if (a.runs !== this.animRun) { this.animRun = a.runs; this.animCell = this.cellAt(e); }
+    if (a.tau <= 0 || a.tau >= 1) return null;
+    const h = this.animCell;
+    const M = toMatrix4(h).multiply(isoPath(p.gamma)(a.eased)).multiply(toMatrix4(inverse(h)));
+    return { M, end: compose(h, compose(p.gamma, inverse(h))) };
+  }
+
+  /** the copy of the cell whose centre is nearest the camera */
+  private cellAt(e: Entry): Iso {
+    const p: Vec3 = [this.fp.pos.x, this.fp.pos.y, this.fp.pos.z], c = e.kit.centroid;
+    let best = IDENTITY, d = Infinity;
+    for (const g of e.gamma.near(c, p, 2 * e.L)) {
+      const q = apply(g, c), dd = Math.hypot(q[0] - p[0], q[1] - p[1], q[2] - p[2]);
+      if (dd < d) { d = dd; best = g; }
+    }
+    return best;
+  }
+
   /** recompute which copies are drawn and where (the camera moved, or the animation is running) */
   private refreshTiles(): void {
     const e = this.entry;
     if (!e || !this.tiles) return;
-    const M = this.animMatrix(e);
-    const R = this.tileRadius(e) + (M ? 1.3 * e.L : 0);
-    const c = e.kit.centroid;
-    const els = e.gamma.near(c, [this.fp.pos.x, this.fp.pos.y, this.fp.pos.z], R);
-    const mats = els.map((g) => (M ? M.clone() : new Matrix4()).multiply(toMatrix4(g)));
+    const A = this.insideAnim(e);
+    const R = this.tileRadius(e);
+    const c = e.kit.centroid, p: Vec3 = [this.fp.pos.x, this.fp.pos.y, this.fp.pos.z];
+    let els: Iso[];
+    if (!A) els = e.gamma.near(c, p, R);
+    else if (det(A.end) > 0) {
+      // a screw path is rigid all the way: draw the copies that it brings near the camera
+      const q = this.fp.pos.clone().applyMatrix4(A.M.clone().invert());
+      els = e.gamma.near(c, [q.x, q.y, q.z], R);
+    } else {
+      // a glide path squashes through its mirror, so it has no inverse half way: take the copies near the camera at the start and at the end
+      const seen = new Map<string, Iso>();
+      for (const q of [p, apply(inverse(A.end), p)]) for (const g of e.gamma.near(c, q, R + 1.3 * e.L)) seen.set(key(g), g);
+      els = [...seen.values()];
+    }
+    const mats = els.map((g) => (A ? A.M.clone() : new Matrix4()).multiply(toMatrix4(g)));
     const crabR = 1.8 * e.L, cv = new Vector3(c[0], c[1], c[2]);
     const centers = mats.map((m) => cv.clone().applyMatrix4(m));
     const { crab } = this.options;

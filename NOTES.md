@@ -136,7 +136,25 @@ The paper calls a non-orientable X an "amphi-Y" where Y is its orientable double
 
 ## 6. Fundamental groups [paper Table 6, p.24; §7]
 
-X, Y, Z or W, X, Z are generators; "Z: X → X⁻¹" means conjugation by Z. In the helicosms Z is the defining screw motion and X, Y generate the lattice perpendicular to it.
+**What the page shows (since 2026-10-09)**: plain generators and relators, written on *our* generators (§8), in `facts.ts` (`pi1`, `pi1Key`). Lower case is a generator, a superscript ⁻¹ its inverse, [a, b] = aba⁻¹b⁻¹.
+
+| | presentation | generators (our isometries) |
+|---|---|---|
+| c1 | ⟨x, y, z \| [x, y], [x, z], [y, z]⟩ | translations e₁, e₂, e₃ |
+| c2 | ⟨x, y, t \| [x, y], txt⁻¹x, tyt⁻¹y⟩ | e₁, e₂; t = (−x, −y, z+1) |
+| c3 | ⟨x, y, t \| [x, y], txt⁻¹y⁻¹x, tyt⁻¹x⟩ | (1,0,0), (½,√3/2,0); t = 120° screw |
+| c4 | ⟨x, y, t \| [x, y], txt⁻¹y⁻¹, tyt⁻¹x⟩ | e₁, e₂; t = 90° screw |
+| c6 | ⟨x, y, t \| [x, y], txt⁻¹y⁻¹, tyt⁻¹y⁻¹x⟩ | (1,0,0), (½,√3/2,0); t = 60° screw |
+| c22 | ⟨a, b \| a²ba²b⁻¹, b²ab²a⁻¹⟩ | the two generators of §8 |
+| +a1 | ⟨t, y, z \| [y, z], [t, y], tzt⁻¹z⟩ | t = (x+1, y, −z); e₂, e₃ |
+| −a1 | ⟨t, u, v \| [u, v], tut⁻¹v⁻¹, tvt⁻¹u⁻¹⟩ | t = (−x, y, z+½); u = (½,½,0), v = (−½,½,0) |
+| +a2 | ⟨s, t, y \| sys⁻¹y, [t, y], tst⁻¹s⟩ | s = (x+½, −y, z), t = (−x, y, z+½); e₂ |
+| −a2 | ⟨s, t, y \| sys⁻¹y, [t, y], tst⁻¹sy⁻¹⟩ | s = (x+½, −y, z), t = (−x, y+½, z+½); e₂ |
+
+- **[computed]** `tests/presentation.test.ts`: every relator is the identity isometry, the generators generate the same group as `platycosms.ts`, and the abelianization (Smith normal form of the relator exponent sums) equals H₁ from Table 6 for all ten.
+- That the relators are *enough* (no relation missing) **[derived]**: every group except c22 is a semidirect product (lattice or Klein-bottle group) ⋊ ℤ, the ℤ being t: the elements fixing the t-direction coordinate form ℤ² (c1–c6, ±a1, with a commuting basis) or the Klein bottle group ⟨s, y | sys⁻¹y⟩ (±a2), and the relators are exactly that group's relators plus how t conjugates its generators. For c22 this is the standard Hantzsche–Wendt presentation **[literature]**, and it agrees with the paper's ⟨X, Y | X = Y²XY², Y = X²YX²⟩ (relators X⁻¹Y²XY², which hold with X = a, Y = b since a², b² are translations inverted by the other).
+
+What the paper's Table 6 shorthand said (kept for reference; the page used it before 2026-10-09): X, Y, Z or W, X, Z are generators; "Z: X → X⁻¹" means conjugation by Z. In the helicosms Z is the defining screw motion and X, Y generate the lattice perpendicular to it.
 
 - c1: X, Y, Z commute.
 - c2: X, Y commute; Z inverts both.
@@ -196,7 +214,7 @@ The descriptions restate facts above; nothing new is claimed except:
 
 ## 9. Open questions / things to double-check
 
-- The amphidicosm presentations (§6) are the Table 6 shorthand.
+- The amphidicosm shorthand in Table 6 is incomplete; the page now uses the full presentations of §6, checked by test.
 - Metachirality: the paper says c3, c4, c6 have enantiomorphic forms. The page says "the two choices are mirror images" [derived].
 - The "monodromy for −a1, Klein bottle fibre is not isotopic to the identity" argument is derived from H₁, not from the mapping class group directly.
 

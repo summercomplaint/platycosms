@@ -108,17 +108,21 @@ const setPop = (open: boolean) => { pop.hidden = !open; bPng.setAttribute('aria-
 bPng.addEventListener('click', () => setPop(pop.hidden === true));
 document.addEventListener('pointerdown', (e) => { if (!pop.hidden && !(e.target as HTMLElement).closest('.savewrap')) setPop(false); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !pop.hidden) { setPop(false); bPng.focus(); } });
+/** e.g. didicosm-c22-outside.png, first-amphicosm-plus-a1-inside.png (the name and symbol on the page, not the internal id) */
+const fileName = (P: PlatycosmDef, m: Mode) =>
+  `${P.name.toLowerCase().replace(/\s+/g, '-')}-${P.sym.replace(/^\+/, 'plus-').replace(/^−/, 'minus-')}-${m}.png`;
 $('bSave').addEventListener('click', async () => {
   setPop(false);
   const blob = await stage.snapshot($<HTMLInputElement>('tTransp').checked);
   if (!blob) return;
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `platycosm-${current.id}-${mode}.png`;
+  a.download = fileName(current, mode);
   document.body.appendChild(a);
   a.click();
   a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  // revoke late: a browser still asking where to save (Firefox) loses the name if the URL goes away first
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
 });
 
 fromHash();

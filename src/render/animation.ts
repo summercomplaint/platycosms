@@ -5,10 +5,13 @@ export class Animator {
   /** progress 0..1 (before easing) */
   tau = 0;
   playing = false;
+  /** goes up by one on every start, so a view can tell a fresh run from one in progress */
+  runs = 0;
   private wait = 0;
   readonly duration = 2.6;
 
   start(gen: number): void {
+    this.runs++;
     this.gen = gen;
     this.tau = 0;
     this.playing = true;

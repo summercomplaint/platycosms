@@ -118,6 +118,7 @@ dl { display: grid; grid-template-columns: auto 1fr; gap: 5px 16px; margin: 0; f
 dt { font-weight: 700; }
 dd { margin: 0; overflow-wrap: anywhere; }
 .details dd { font-size: .88rem; }
+.details .pres { overflow-wrap: normal; } /* break a presentation between relators, not inside one */
 footer { font-size: .84rem; max-width: 120ch; }
 @media (max-width: 960px) { main { grid-template-columns: minmax(0, 1fr); } .stage { height: 64vh; } .panel { max-height: none; } }
 /* phones: the platycosm bar becomes one row that scrolls sideways (swipe), running to the screen edges */

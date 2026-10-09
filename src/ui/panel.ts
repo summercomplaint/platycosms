@@ -1,6 +1,7 @@
 import { factsFor } from '../data/facts';
 import { content } from '../content';
 import { describeIso } from '../math/gluing';
+import { formatPresentation } from '../math/presentation';
 import type { Stage } from '../render/stage';
 import type { Mode } from '../render/stage';
 import { paragraphs } from './markdown';
@@ -47,7 +48,7 @@ export function renderPanel(el: HTMLElement, stage: Stage, mode: Mode): void {
         ${row(wiki('Holonomy', 'Holonomy'), `order ${F.holonomyOrder} (${wiki('point group', 'Crystallographic_point_group')} ${F.pointGroup})`)}
         ${row(wiki('Space group', 'List_of_space_groups'), F.spaceGroup)}
         ${row("Wolf's name", F.wolf)}
-        ${row(wiki('π₁', 'Fundamental_group'), esc(F.pi1))}
+        ${row(wiki('π₁', 'Fundamental_group'), `<span class="pres">${esc(formatPresentation(F.pi1))}</span><br><span class="small">${esc(F.pi1Key)}</span>`)}
         ${row('Shape parameters', String(F.shapeParameters))}
         ${row(wiki('Seifert fibrations', 'Seifert_fiber_space'), `${esc(F.seifert.map((s) => `${s.count}: ${s.type}`).join('; '))} (${wiki('notation', 'Orbifold_notation')})`)}
         ${row('Flat surfaces', esc(F.surfaces))}
@@ -62,7 +63,15 @@ export function renderPanel(el: HTMLElement, stage: Stage, mode: Mode): void {
     const i = Number(b.dataset.pair);
     ['mouseenter', 'focus'].forEach((ev) => b.addEventListener(ev, () => stage.highlight(pairs[i].polys)));
     ['mouseleave', 'blur'].forEach((ev) => b.addEventListener(ev, () => stage.highlight(null)));
-    b.addEventListener('click', () => { stage.anim.start(i); stage.applyOptions(); });
+    b.addEventListener('click', () => {
+      stage.anim.start(i);
+      stage.applyOptions();
+      // in the one-column layout (phones) the list is below the view: bring the view back up to watch
+      const view = document.getElementById('stageBox');
+      if (view && matchMedia('(max-width: 960px)').matches && view.getBoundingClientRect().top < 0) {
+        view.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      }
+    });
   });
   // the Clear button lives in the view (index.html); set with onclick so re-rendering does not stack handlers
   const clear = document.getElementById('aClear') as HTMLButtonElement;
