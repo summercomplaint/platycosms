@@ -72,6 +72,13 @@ Matches the paper's Table 4: ±a2 have exactly one circle family of Klein bottle
 a half-shift along the fibre's circle direction. That it is not isotopic to the identity follows [derived] from H₁(−a1) = ℤ² versus H₁(K × S¹) = ℤ² × ℤ/2.
 "Reflection, split / non-split" refers to the conjugacy class of the monodromy in GL₂(ℤ): conjugate to diag(1, −1) (split) or to the swap matrix (non-split).
 
+**Shape of the torus fibre [derived from the monodromy column, which is computed; literature: the five 2D Bravais lattices].** The fibre lattice must be
+invariant under the monodromy's linear part, and that forces its shape: quarter turn (c4) → **square**; third or sixth turn (c3, c6) → **hexagonal**
+(a 60° rhombus, or a regular hexagon with opposite sides glued); split reflection (+a1) → **rectangular**; non-split reflection (−a1) → **rhombic**
+(centred rectangular); identity or half turn (c1, c2) → any lattice, so the panel names no shape. This matches the paper's space groups: P4₁ tetragonal,
+P3₁ / P6₁ hexagonal, Pc primitive versus Cc centred monoclinic. "Rectangular" means opposite edges glued straight across: any parallelogram can be cut
+and re-pasted into a rectangle, but then one pair of edges is glued with a sideways shift, which is a different flat torus (e.g. its shortest loops are not at 90°).
+
 **[literature]** Wikipedia ("Flat manifold", "Hantzsche–Wendt manifold") says the same for the orientable ones: the first five are torus bundles over the circle with monodromy of order 1, 2, 4, 6, 3 (c1, c2, c4, c6, c3), and the Hantzsche–Wendt manifold does not fibre over S¹ because its first homology is finite. It also notes HW fibres over an interval with Klein-bottle fibres, matching the paper's `[∓1sK (2T) ∓1sK]`. The non-orientable cases (K-bundles, K × S¹) are only checked by our own computation and the paper's Table 4.
 
 Seifert fibrations are a different, weaker structure (fibres are circles, base an orbifold). **Every** platycosm has one [paper p.10, Table 3], including c22.

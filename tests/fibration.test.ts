@@ -30,6 +30,7 @@ describe('mapping tori, computed from the generators', () => {
   it('-a1 has both fibre types, no Klein bottle product', () => {
     const fs = sum('a1m').fibrations;
     expect(fs.some((f) => f.fibre === 'torus')).toBe(true);
+    expect(fs.some((f) => f.fibre === 'torus' && f.monodromy.kind === 'reflection' && !f.monodromy.split)).toBe(true);
     expect(fs.some((f) => f.fibre === 'Klein bottle')).toBe(true);
     expect(fs.some((f) => f.fibre === 'Klein bottle' && f.product)).toBe(false);
   });
