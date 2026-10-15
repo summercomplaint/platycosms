@@ -8,7 +8,13 @@ const get = (path: string): string => {
 };
 
 export const content = {
-  intro: (): string[] => Object.keys(files).filter((k) => k.startsWith('../content/intro/')).sort().map((k) => files[k]),
+  whatIs: (): string => get('intro/1-what-is-a-platycosm.md'),
+  howToRead: (): string => get('intro/2-how-to-read.md'),
+  stillConfused: (): string => get('home/still-confused.md'),
+  learn: (): string => get('learn/placeholder.md'),
   gluings: (mode: 'outside' | 'inside'): string => get(`gluings/${mode}.md`),
   description: (id: string): string => get(`platycosms/${id}/description.md`),
+  tagline: (id: string): string => get(`platycosms/${id}/tagline.md`),
+  /** every file, for checks */
+  all: (): string[] => Object.keys(files).filter((k) => !k.endsWith('README.md')).map((k) => files[k]),
 };

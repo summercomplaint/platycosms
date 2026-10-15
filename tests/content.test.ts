@@ -10,13 +10,21 @@ describe('page text in content/', () => {
       expect(content.description(P.id).trim().length).toBeGreaterThan(50);
     });
   }
-  it('has the intro and both gluing notes', () => {
-    expect(content.intro().length).toBe(2);
+  for (const P of PLATYCOSMS) {
+    it(P.id + ' has a short tagline for its card, without links (the card is a link)', () => {
+      const t = content.tagline(P.id).trim();
+      expect(t.length).toBeGreaterThan(20);
+      expect(t.length).toBeLessThan(120);
+      expect(t).not.toContain('](');
+    });
+  }
+  it('has the intro, the learn page and both gluing notes', () => {
+    for (const s of [content.whatIs(), content.howToRead(), content.stillConfused(), content.learn()]) expect(s.trim()).not.toBe('');
     expect(content.gluings('outside').trim()).not.toBe('');
     expect(content.gluings('inside').trim()).not.toBe('');
   });
   it('links only to images that exist in public/', () => {
-    const all = [...content.intro(), content.gluings('outside'), content.gluings('inside'), ...PLATYCOSMS.map((P) => content.description(P.id))].join('\n');
+    const all = content.all().join('\n');
     const names = [...all.matchAll(/\]\(([a-z0-9-]+\.(?:png|jpg|svg))\)/g)].map((m) => m[1]);
     expect(names).toContain('figure-33.png');
     for (const n of names) expect(existsSync(new URL('../public/' + n, import.meta.url)), n).toBe(true);
@@ -30,6 +38,7 @@ describe('the Markdown subset', () => {
     expect(inline('[K](https://en.wikipedia.org/wiki/Klein_bottle)')).toBe('<a href="https://en.wikipedia.org/wiki/Klein_bottle" target="_blank" rel="noopener">K</a>');
     expect(inline('[x](javascript:alert(1))')).not.toContain('href');
     expect(inline('[the torocosm](#c1)')).toBe('<a href="#c1">the torocosm</a>');
+    expect(inline('[home](#)')).toBe('<a href="#">home</a>');
     expect(inline('[this diagram](figure-33.png)')).toBe('<a href="figure-33.png" target="_blank" rel="noopener">this diagram</a>');
   });
   it('splits paragraphs on blank lines and joins wrapped lines', () => {

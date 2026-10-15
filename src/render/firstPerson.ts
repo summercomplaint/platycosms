@@ -21,7 +21,10 @@ export class FirstPerson {
     });
     dom.addEventListener('pointermove', (e) => {
       if (!this.enabled || !this.dragging) return;
-      const k = (this.camera.fov * Math.PI) / 180 / dom.clientHeight;
+      // a mouse grabs the world (drag right and the world turns right, as in the outside view); a finger steers the
+      // view instead (a tester guessed that suits a phone; not yet tried on one)
+      const s = e.pointerType === 'mouse' ? -1 : 1;
+      const k = (s * (this.camera.fov * Math.PI)) / 180 / dom.clientHeight;
       this.yaw -= (e.clientX - this.last.x) * k;
       this.pitch = Math.max(-1.5, Math.min(1.5, this.pitch - (e.clientY - this.last.y) * k));
       this.last = { x: e.clientX, y: e.clientY };

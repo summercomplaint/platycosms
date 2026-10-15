@@ -20,7 +20,40 @@ Style follows Greg Egan's "Loops Across Space" coloured-cylinder figure. Math so
 - No edge/vertex lists, no cell-face fill, no rotate toggle (removed in phase 8). +a1 is drawn as a cube (only +a1; the user chose not to change the other 1 x ½ x ½ boxes).
 - Everything pushed to https://github.com/summercomplaint/platycosms (public). No Pages deployment unless asked.
 
-## Phases
+## Redesign (branch `redesign`, started 2026-10-15; merge to main only if the user likes it)
+Why: friends' feedback (a newcomer "had no idea what I'm looking at"; crabs pop in; inside drag feels backwards on desktop;
+not obvious that gluings can be clicked; hard to tell which arrows go together), and the one-page format left no room.
+Goal: a site that shows much more of the paper. A home page, then one roomy page per platycosm.
+
+User decisions (2026-10-15):
+- The one-file build no longer matters (the talk uses slides). Routes are hashes: `#` (or empty) home, `#learn` the
+  "still confused?" page, `#c22`, `#c22/inside`, `#c22/outside/anim2@0.5` (old links keep working).
+- Home: the intro text as a sidebar on the left, the ten as a vertical list of cards with a preview each (stills drawn
+  once by one renderer, spinning on hover). Phones: stacked.
+- Platycosm page: a sticky viewer (left; top on phones), sections scrolling beside it, each section able to drive the
+  viewer (overlays). A strip of the ten at the top.
+- Shape sliders: shape only, volume fixed at 1 (N−1 sliders); volume, diameter, injectivity radius shown live.
+- The learn page is a placeholder until we write it together (build up from circle → torus → 3-torus).
+- Make the code modular and maintainable: pages, sections, overlays, shape state, each in its own file.
+
+Phases (each: tests + typecheck green, commit, push the branch, tick here):
+- [x] R1. Restructure, no new maths: router, home with stills, platycosm page in the sticky layout, learn placeholder.
+  Feedback fixes: crabs fade out with distance (dithered, 1.4 L to 2.2 L; before: cut off at 1.8 L) and more are drawn;
+  inside view: a mouse now grabs the world like the outside view (it used to steer the view), touch unchanged;
+  pointing at an edge/ball fades everything but its class, with a caption (tap on touch); a "Play a gluing" row in the view.
+  Done 2026-10-15. Map: src/app (router.ts, theme.ts, stageHost.ts: one Stage, its canvas moved between pages),
+  src/pages (home, platycosm, learn), src/sections (overview, gluings, details; the order is in pages/platycosm.ts),
+  src/render/entries.ts (analysis + kits shared by the viewer and the previews), cellGroup.ts (outside cell, ghost,
+  framing), previews.ts (one off-screen renderer copies stills into the cards), overlays/ (FaceHighlight, ClassHover).
+  Headless shots: Edge will not go narrower than 500 px, so use W=500 for phone width (420 looks cut off but is not).
+- [ ] R2. Shape parameters: Γ_A = AΓA⁻¹, domain A(D) (same combinatorics); test the dimension against Table 2; sliders
+  on a bar in the viewer, Bravais presets; live volume, diameter and injectivity radius (Table 9, checked numerically).
+- [ ] R3. Holonomy: each generator as a path from the crab through its face; the crab walks it and comes back turned or mirrored.
+- [ ] R4. Slices: a plane sweeping the cell, the slice as a 2D gluing diagram (T² / K), height slider, monodromy; Table 4 families.
+- [ ] R5. Seifert fibrations: fibre circles, exceptional fibres highlighted, one family at a time (Table 3).
+- [ ] R6. Learn page, written with the user.
+
+## Phases (before the redesign)
 - [x] 0. Repo scaffold, legacy backup, docs
 - [x] 1. TypeScript project, port math/mesh/data, tests green
 - [x] 2. Seams (Egan's extra edge) + real Euler check (V-E+F-1=0 for all 10)
