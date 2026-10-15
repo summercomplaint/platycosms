@@ -31,7 +31,7 @@ acting freely (no fixed points). There are exactly 10 [paper §1, Appendix I]. T
 |---|---|---|---|---|---|---|---|---|---|---|
 | Wolf [Table 11] | G1 | G2 | G3 | G4 | G5 | G6 | B1 | B2 | B3 | B4 |
 | Other names [Table 11] | 3-torus | half-turn space | one-third turn space | quarter-turn space | one-sixth turn space | Hantzsche–Wendt | Klein bottle × circle | | | |
-| Space group [Table 12] | P1 (1) | P2₁ (4) | P3₁/P3₂ (144/145) | P4₁/P4₃ (76/78) | P6₁/P6₅ (169/170) | P2₁2₁2₁ (19) | Pc (7) | Cc (9) | Pca2₁ (29) | Pa2₁ (33) |
+| Space group [Table 12] | P1 (1) | P2₁ (4) | P3₁/P3₂ (144/145) | P4₁/P4₃ (76/78) | P6₁/P6₅ (169/170) | P2₁2₁2₁ (19) | Pc (7) | Cc (9) | Pca2₁ (29) | Pna2₁ (33) |
 | Point group (orbifold) [Table 2] | 1 | 22 | 33 | 44 | 66 | 222 | * | * | *22 | *22 |
 | Holonomy order [computed] | 1 | 2 | 3 | 4 | 6 | 4 | 2 | 2 | 4 | 4 |
 | Orientable [computed] | yes | yes | yes | yes | yes | yes | no | no | no | no |
@@ -41,6 +41,8 @@ acting freely (no fixed points). There are exactly 10 [paper §1, Appendix I]. T
 | Mapping torus [computed] | yes | yes | yes | yes | yes | **no** | yes | yes | yes | yes |
 | Orientable double cover [paper §3; computed] | – | – | – | – | – | – | c1 | c1 | c2 | c2 |
 | Bravais types [§11] | 14 | 5 | 1 | 1 | 1 | 3 | 5 | 5 | 1 | 1 |
+
+Space group of −a2 [paper Table 12, corrected; literature: International Tables]: the paper prints "P a2₁" for no. 33, but no. 33 is Pna2₁. The glide components agree: the mirror ⊥ x carries the diagonal shift (0, ½, ½), an n-glide, and the mirror ⊥ y carries (½, 0, 0), an a-glide. +a2 has (0, 0, ½) ⊥ x, a c-glide, so it is Pca2₁, matching the paper. (Changed from "Pa2₁" on 2026-10-14.)
 
 Sum of the free parameters over the ten (a consistency test, not a paper fact): 33. Bravais types total 37 [paper p.39].
 
@@ -70,6 +72,13 @@ it is a **torus** if all of Γ₀ preserves the plane's orientation, a **Klein b
 Matches the paper's Table 4: ±a2 have exactly one circle family of Klein bottles `(2K)^1`; ±a1 have `(2K)^∞` and `(2T)^∞`; c2 has `(2T)^1`.
 "Twisted" for a Klein bottle fibre means: not a product, i.e. no pure translation along v in Γ. For −a1 the monodromy is trivial on the fibre's point group but is
 a half-shift along the fibre's circle direction. That it is not isotopic to the identity follows [derived] from H₁(−a1) = ℤ² versus H₁(K × S¹) = ℤ² × ℤ/2.
+**The ±a2 Klein bottle fibre and its monodromy [derived from the generators; direction, base and the mirror lifts computed in `tests/fibration.test.ts`; checked against the paper's H₁].**
+In our box [0,1]×[0,½]×[0,½] the slices are horizontal and the circle is one cell high (base ½). A slice is the 1 × ½ cross-section: its left and right ends are glued
+straight (T(1,0,0)), and its front edge and back edge are each glued to themselves by a half shift ((x, y) → (x + ½, −y), and the same composed with T(0,1,0)).
+Cutting at y = ¼ splits it into two Möbius bands, whose core circles are the folded front and back edges. Equivalently, cut at x = ½ and flip the right half
+in front of the left: you get the textbook square, with one pair of sides glued straight and the other flipped. The monodromy is +a2: (x, y) → (−x, y), a mirror that keeps each Möbius band in place; −a2: (x, y) → (−x, y + ½), a glide reflection that swaps them. No lift of the −a2 monodromy is a plain mirror. On the Klein bottle a mirror and a half turn can be the same map (compose with the fibre's own glide), so "mirror" names the lift we use.
+Check: H₁(K) = ℤa ⊕ (ℤ/2)b, with a the front core and b the front-to-back loop, and H₁ of the bundle is ℤ ⊕ coker(φ* − 1). For +a2, φ*: a ↦ −a, b ↦ b, so the cokernel is (ℤ/2)², which gives ℤ × (ℤ/2)².
+For −a2, a ↦ −a + b, so the cokernel is ℤ/4, which gives ℤ × ℤ/4. Both match the paper's Table 6.
 "Reflection, split / non-split" refers to the conjugacy class of the monodromy in GL₂(ℤ): conjugate to diag(1, −1) (split) or to the swap matrix (non-split).
 
 **Shape of the torus fibre [derived from the monodromy column, which is computed; literature: the five 2D Bravais lattices].** The fibre lattice must be

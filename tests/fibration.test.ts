@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { PLATYCOSMS, byId } from '../src/data/platycosms';
 import { summarize } from '../src/math/fibration';
+import { enumerate } from '../src/math/group';
 
 const sum = (id: string) => summarize(byId(id)!.gens);
 
@@ -41,5 +42,19 @@ describe('mapping tori, computed from the generators', () => {
       expect(fs[0].fibre).toBe('Klein bottle');
       expect(fs[0].product).toBe(false);
     }
+  });
+  it('amphidicosms: horizontal slices, one cell high; the monodromy is a mirror (+a2) or a mirror with a half slide along it (-a2)', () => {
+    for (const id of ['a2p', 'a2m']) {
+      const f = sum(id).fibrations[0];
+      expect(Math.abs(f.direction[2])).toBeCloseTo(1);
+      expect(f.base).toBeCloseTo(0.5);
+    }
+    // lifts of the monodromy that mirror x and keep y: the front-to-back shift they carry, mod 1
+    const mirror = [-1, 0, 0, 0, 1, 0, 0, 0, 1];
+    const shifts = (id: string) => [...new Set(enumerate(byId(id)!.gens, 10, 6)
+      .filter((g) => Math.abs(g.t[2] - 0.5) < 1e-6 && g.A.every((v, i) => Math.abs(v - mirror[i]) < 1e-6))
+      .map((g) => (((g.t[1] % 1) + 1) % 1).toFixed(4)))];
+    expect(shifts('a2p')).toEqual(['0.0000']);
+    expect(shifts('a2m')).toEqual(['0.5000']);
   });
 });
