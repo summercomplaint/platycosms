@@ -120,6 +120,19 @@ canvas { display: block; }
 .tools .seg button { border: 0; border-radius: 0; }
 .tools .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 700; }
 /* Save PNG opens a small popover above the button */
+/* the shape bar: sliders, Bravais presets, live measures; above the tools */
+.shapebar { position: absolute; left: 12px; bottom: 56px; width: min(420px, calc(100% - 24px)); max-height: calc(100% - 120px); overflow-y: auto; display: grid; grid-template-columns: max-content minmax(0, 1fr) 3.4em; gap: 8px; column-gap: 8px; padding: 10px 12px; background: var(--pill); border: 1px solid var(--accent); border-radius: 10px; font-size: .85rem; z-index: 2; }
+.shapebar .presets, .shapebar .readout { grid-column: 1 / -1; }
+.shapebar .presets { display: flex; flex-wrap: wrap; gap: 4px; }
+.shapebar button { font: inherit; font-size: .8rem; background: var(--bg); color: var(--fg); border: 1px solid var(--accent-dim); border-radius: 7px; padding: 2px 8px; cursor: pointer; }
+.shapebar .presets button { font-family: var(--font-mono); }
+.shapebar button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.srow { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center; }
+.srow input { width: 100%; accent-color: var(--accent); margin: 0; }
+.srow output { font-family: var(--font-mono); text-align: right; }
+.shapebar .readout { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; font-family: var(--font-mono); font-size: .8rem; }
+.shapebar .readout .reset { margin-left: auto; font-family: var(--font-ui); }
+.tools .shape-open[aria-expanded="true"] { border-color: var(--accent); }
 .savewrap { position: relative; display: inline-flex; }
 .tools .pop { position: absolute; right: 0; bottom: calc(100% + 8px); display: grid; gap: 8px; min-width: 210px; padding: 10px 12px; background: var(--bg); border: 1px solid var(--accent); border-radius: 10px; pointer-events: auto; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); }
 .tools .pop label { border: 0; padding: 0; background: none; }
@@ -182,4 +195,5 @@ dd .pres { overflow-wrap: normal; } /* break a presentation between relators, no
   .card { grid-template-columns: 84px minmax(0, 1fr); gap: 12px; }
   .card canvas { width: 84px; height: 84px; }
   .glue-row .lbl { display: none; }
+  .shapebar { left: 8px; right: 8px; width: auto; bottom: 50px; max-height: 58%; }
 }

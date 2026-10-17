@@ -197,7 +197,53 @@ A, B, C, D are the paper's shape parameters (conorms of the "naming lattice"; A,
 | +a2 | min(A, B, C) | (A+B+C)/4 |
 | −a2 | min(A, B, 4C) | ≥ ¼ max(β, γ) |
 
-Volume of c22 with screw lengths a, b, c: 2abc [paper p.13]. Footnote: for −a2 the proof text on p.31 says min(A, B, 4D) while Table 9 says min(A, B, 4C); the paper is inconsistent with itself (D vs C is the screw-direction parameter) and we follow Table 9. The paper conjectures every platycosm's diameter equals its orbit-lattice bound.
+Volume of c22 with screw lengths a, b, c: 2abc [paper p.13]. Footnote: for −a2 the proof text on p.31 says min(A, B, 4D) while Table 9 says min(A, B, 4C); this is only a change of letter (§7a). The injectivity column is the squared shortest geodesic, (2 · inj)² (§7a). The paper conjectures every platycosm's diameter equals its orbit-lattice bound.
+
+## 7a. Shapes, and the metric facts we compute (since 2026-10-17, phase R2)
+
+**Shapes [derived; computed].** Every linear part L of our generators is orthogonal, so a flat metric on R³/Γ is a symmetric positive G with
+GL = LG for all L (`src/math/shape.ts`). With M = √G (symmetric), M commutes with every L, so MΓM⁻¹ keeps the linear parts, maps translation
+parts t ↦ Mt, and M(D) is a fundamental domain with the same cell structure. `tests/shape.test.ts` checks: the space of such G has dimension
+6, 4, 2, 2, 2, 3, 4, 4, 3, 3, exactly Table 2's free parameters; the sliders (volume fixed at 1, so one fewer) move G in independent directions;
+the deformed domain still tiles, with the same classes; carrying the default analysis over by M gives the same skeleton and gluings as a fresh analysis.
+
+Sliders are lengths and angles of the default box (x length, y depth, z height); the length follows from volume 1. Which angles may move is
+forced by the holonomy: c1 all three, c2 and +a1 length–depth, −a1 depth–height, none for the rest; c3, c4, c6 stretch length and depth together.
+
+**Bravais presets [paper §11; computed].** c1: the 14 Bravais lattices as primitive bases of standard conventional cells [literature]; the test
+counts their lattice symmetries (2, 4, 4, 8, 8, 8, 8, 16, 16, 12, 24, 48, 48, 48). c2: the plane lattice under the screw is square, rectangular,
+rhombic, hexagonal or oblique; the test computes its conorms and finds AA0, AB0, AAB, AAA, ABC [paper Table 1]. ±a1: the five types of §11 with
+the glide vector x distinguished, A = −w·x, B = −w·y, C = −x·y (w = −x−y): AB0 (our default box), ABC, ABB, 0BC, 0BB, checked from the conorms
+of x and the second vector y of the mirror plane. c22: all equal, two equal, all different screw vectors. c3, c4, c6, ±a2: one type each.
+Our parameters ↔ the paper's: c2 and +a1, x = (1,0,0), y = (0,1,0), z = (0,0,1) (z the screw / normal vector, D = |z|²); c3, c6, A = |x|²/2;
+c4, A = |x|²; c22, the screw vectors (½,0,0), (0,½,0), (0,0,½); −a1, glide x = (0,0,½), y = (0,½,0), z = (½,0,0); +a2, (½,0,0), (0,0,½),
+(0,1,0); −a2, glide x = (½,0,0), screw y = (0,0,½), and z = (0,½,0), whose double is a translation but which is not itself a geodesic vector.
+(All mapped by M.)
+
+**Injectivity radius [computed].** Half the shortest closed geodesic: ½ min over γ ≠ 1 of |Pt|, P the projection onto the vectors L fixes
+(`src/math/metric.ts`), searched in a radius that provably reaches every conjugacy class. **Table 9's "squared injectivity radius" column is
+(2 · injectivity radius)², i.e. the squared length of the shortest closed geodesic**, not the squared radius (e.g. the unit 3-torus: the table
+gives its minimal vonorm 1, the injectivity radius is ½). Read that way, every row of Table 9 matches our computation on several shapes, all ten
+platycosms, including the two exceptions −a1 and −a2 worked out in §9 of the paper. The −a2 row's "4C" (Table 9) versus "4D" (text) is only a
+change of letter: it is the norm of z above.
+
+**Diameter [computed].** The farthest point from p is the farthest corner of p's Voronoi cell among its images Γp; the diameter is the largest
+of these over p. The search is a branch and bound that returns a certified range [a real pair of points, an upper bound]: the covering radius
+R(p) does not change when p moves along a direction every L fixes, and changes by at most |δ| when p moves by δ across them. Checks:
+- c2, c3, c4, c6, +a1, +a2 (where the paper proves its formula): Table 9's value lies in the certified range on 3 or 4 shapes each.
+- c1: cubic, body- and face-centred cubic give √3/2, √5/4, ½ times the cube side [literature: covering radii].
+- c22, −a2, −a1: Table 9 gives the *orbit-lattice bound*, a lower bound that the paper conjectures is the diameter ("orbit lattice
+  conjecture", p.32). Our upper bound is never below it, and the default shapes (all screw vectors equal) attain it. For −a2 the bound is the
+  larger of the two α-type terms led by the glide vector and by the screw vector (the only reading that is a lower bound on all 25 shapes we
+  tried; the paper says "β, γ" without saying which vectors).
+- **The orbit lattice conjecture appears to fail for c22 and −a2 [computed].** c22 with squared screw lengths A, B, C = 0.482, 1.44, 0.36
+  (volume 1; sliders depth 1.2, height 0.6): the bound is 4R₀² = max(α, β, γ) = 2.926, but there are points p, y with 4|p − y|² ≥ 3.17 and
+  no image of p closer to y than p itself. −a2 at the same sliders: bound 2.925, pair at 4d² ≥ 3.14. `tests/metric.test.ts` checks each pair
+  with nothing but a breadth-first search of the generators. We also confirmed numerically that the paper's α, β, γ are the covering radii of
+  orbits that are lattices, so the formulas are right; the diameter is attained elsewhere. We found nothing on this in the literature (search, 2026-10-17).
+- −a1's long formula (§9, read from the PDF text, whose Δ denominators lost their symbol): our range contains it at the default shape and lies
+  above it elsewhere; at sliders depth 0.7, height 1.1, angle 100° the pair found beats it by about 1%. Not claimed as a counterexample, since
+  the transcription is not certain.
 
 ## 8. Conventions used in *our* code (not the paper's)
 
@@ -217,7 +263,7 @@ Since 2026-10-08 c22, −a1 and +a2 also get a midline round their long faces (`
 
 ## 8a. The page text (the files in `content/`)
 
-The details panel does not show the injectivity radius or diameter (§7) since 2026-10-09: they need the paper's shape parameters, which the page does not explain. The data stays in `facts.ts`.
+The details panel does not show the paper's formulas for the injectivity radius or diameter (§7) since 2026-10-09: they need the paper's shape parameters. Since 2026-10-17 the shape bar in the view shows both as numbers, computed for the shape on screen (§7a).
 
 The descriptions restate facts above; nothing new is claimed except:
 

@@ -46,8 +46,17 @@ Phases (each: tests + typecheck green, commit, push the branch, tick here):
   src/render/entries.ts (analysis + kits shared by the viewer and the previews), cellGroup.ts (outside cell, ghost,
   framing), previews.ts (one off-screen renderer copies stills into the cards), overlays/ (FaceHighlight, ClassHover).
   Headless shots: Edge will not go narrower than 500 px, so use W=500 for phone width (420 looks cut off but is not).
-- [ ] R2. Shape parameters: Γ_A = AΓA⁻¹, domain A(D) (same combinatorics); test the dimension against Table 2; sliders
+- [x] R2. Shape parameters: Γ_A = AΓA⁻¹, domain A(D) (same combinatorics); test the dimension against Table 2; sliders
   on a bar in the viewer, Bravais presets; live volume, diameter and injectivity radius (Table 9, checked numerically).
+  Done 2026-10-17. Map: src/math/shape.ts (sliders, presets, M = √G, deformSpec / deformAnalysis / deformPairings),
+  src/math/metric.ts (injectivity radius; DiameterSearch, a certified branch and bound that steps within a time budget),
+  src/app/shapeState.ts (values per platycosm, in memory), src/ui/shapeBar.ts (the bar; "Shape" in the view's tools),
+  entries.ts (`entryFor(def, M)`: one shaped entry kept, built from the cached default analysis), Stage.show(def, M) keeps
+  the camera for a new shape of the same platycosm. Sliders: Depth, Height, Angle (user's choice: plain words); the length
+  follows from volume 1. The gluing list still describes the default box. NOTES.md §7a has the maths and two findings:
+  Table 9's injectivity column is (2 · inj)², and the paper's orbit lattice conjecture appears to fail for c22 and −a2.
+  `?shape` opens the bar, `?shape=<preset>` or `?shape=1.2,0.6` also sets the shape (for shots: `QUERY='&shape=oF' scripts/shots.sh ...`).
+  Gotcha: `analyze` only enumerates elements with |t| <= 4; pass `maxT: 9` for a cell scaled to volume 1 and stretched.
 - [ ] R3. Holonomy: each generator as a path from the crab through its face; the crab walks it and comes back turned or mirrored.
 - [ ] R4. Slices: a plane sweeping the cell, the slice as a 2D gluing diagram (T² / K), height slider, monodromy; Table 4 families.
 - [ ] R5. Seifert fibrations: fibre circles, exceptional fibres highlighted, one family at a time (Table 3).

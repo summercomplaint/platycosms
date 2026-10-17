@@ -2,6 +2,7 @@ import { PLATYCOSMS, PlatycosmDef, byId } from '../data/platycosms';
 import { factsFor } from '../data/facts';
 import { Route, PageMaker, cosmHash } from '../app/router';
 import { getStage } from '../app/stageHost';
+import { entryFor } from '../render/entries';
 import type { Mode } from '../render/stage';
 import type { ClassInfo } from '../render/overlays/classHover';
 import { details } from '../sections/details';
@@ -9,6 +10,12 @@ import { gluings, pairLabels } from '../sections/gluings';
 import { overview, reading } from '../sections/overview';
 import type { Section, SectionContext } from '../sections/section';
 import { wireSavePng } from '../ui/savePng';
+import { chosenShape, shapeBar } from '../ui/shapeBar';
+import { setShapeValues } from '../app/shapeState';
+import { presetValues, shapeDef, shapeMatrix } from '../math/shape';
+
+/** whether the shape bar is open (kept from one platycosm to the next) */
+let shapeOpen = false;
 
 /** The sections of a platycosm page, top to bottom. Add new ones here (see src/sections/section.ts). */
 const SECTIONS: Section[] = [overview, gluings, reading, details];
@@ -36,12 +43,14 @@ export const platycosmPage: PageMaker = (root, first) => {
             </div>
             <div class="hint" hidden><span>Drag to look · W A S D or arrow keys to move · Q / E down and up · scroll to zoom</span></div>
             <div class="caption" hidden></div>
+            <div class="shapebar" id="shapebar" hidden></div>
             <div class="tools">
               <div class="seg" role="group" aria-label="View">
                 <button type="button" data-mode="outside">Outside</button>
                 <button type="button" data-mode="inside">Inside</button>
               </div>
               <label><input type="checkbox" class="crab-box"> Crab</label>
+              <button type="button" class="shape-open" aria-expanded="false" aria-controls="shapebar">Shape</button>
               <span class="gap"></span>
               <div class="savewrap">
                 <button type="button" class="save-open" aria-haspopup="dialog" aria-expanded="false">Save PNG</button>
@@ -70,14 +79,15 @@ export const platycosmPage: PageMaker = (root, first) => {
   function go(id: string, m: Mode): void {
     def = byId(id) ?? def;
     mode = m;
-    stage.show(def);
+    stage.show(def, chosenShape(def));
     stage.setMode(m);
     if (rendered !== def.id + mode) { render(); rendered = def.id + mode; }
     try { history.replaceState(null, '', cosmHash(def.id, mode)); } catch { /* ignore */ }
   }
 
   function render(): void {
-    const e = stage.entry!;
+    // the gluings are described in the default box (whatever shape is chosen, they glue the same faces the same way)
+    const e = entryFor(def);
     const ctx: SectionContext = { def, facts: factsFor(def.id), pairs: e.pairs, mode, stage };
     article.innerHTML = SECTIONS.map((s) =>
       `<section class="sec" id="sec-${s.id}">${s.title ? `<h3>${s.title}</h3>` : ''}${s.html(ctx)}</section>`).join('');
@@ -95,6 +105,7 @@ export const platycosmPage: PageMaker = (root, first) => {
     $('.hint').hidden = mode !== 'inside';
     clear.textContent = mode === 'outside' ? 'Clear ghost' : 'Walk back';
     document.title = `${def.name} (${def.sym}) · The ten platycosms`;
+    shapeUi.render();
   }
 
   /** every gluing button on the page (in the view and in the list): hover shows the faces, a click plays it */
@@ -129,6 +140,11 @@ export const platycosmPage: PageMaker = (root, first) => {
   });
   crabBox.checked = stage.options.crab;
   crabBox.addEventListener('change', () => { stage.options.crab = crabBox.checked; stage.applyOptions(); });
+  const shapeEl = $('.shapebar'), shapeBtn = $<HTMLButtonElement>('.shape-open');
+  const shapeUi = shapeBar(shapeEl, stage, () => def);
+  const showBar = () => { shapeEl.hidden = !shapeOpen; shapeBtn.setAttribute('aria-expanded', String(shapeOpen)); };
+  shapeBtn.addEventListener('click', () => { shapeOpen = !shapeOpen; showBar(); });
+  showBar();
   const offSave = wireSavePng($('.savewrap'), stage, () => ({ def, mode }));
 
   // the view sticks just under the strip, whose height depends on how its buttons wrap
@@ -157,6 +173,16 @@ export const platycosmPage: PageMaker = (root, first) => {
       ? 'All one edge' : 'All one point');
   };
 
+  // ?shape opens the shape bar (for screenshots); ?shape=<preset> or ?shape=<v1,v2,...> also sets the first shape
+  const shapeQ = new URLSearchParams(location.search).get('shape');
+  if (shapeQ !== null) {
+    shapeOpen = true;
+    showBar();
+    const p = shapeDef(def.id).presets.find((x) => x.name === shapeQ);
+    const v = p ? presetValues(def, p) : shapeQ.split(',').map(Number);
+    if (v.length === shapeDef(def.id).sliders.length && v.every(Number.isFinite) && shapeMatrix(def, v)) setShapeValues(def, v);
+  }
+
   /* ---------- routes ---------- */
   function take(route: Route): boolean {
     if (route.page !== 'cosm') return false;
@@ -172,6 +198,7 @@ export const platycosmPage: PageMaker = (root, first) => {
       window.removeEventListener('keydown', onKey);
       stripRo.disconnect();
       offSave();
+      shapeUi.stop();
       stage.onFrame = null;
       stage.classes.onChange = null;
       stage.highlight(null);

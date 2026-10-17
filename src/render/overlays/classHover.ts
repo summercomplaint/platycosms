@@ -18,6 +18,8 @@ export class ClassHover implements Overlay {
   private dirty = false;
   private picked: ClassInfo | null = null;
   private down: { x: number; y: number } | null = null;
+  /** edge classes shown by `focus` (a shape slider is hovered), or null */
+  private focused: number[] | null = null;
 
   constructor(canvas: HTMLCanvasElement) {
     const at = (e: PointerEvent) => {
@@ -36,6 +38,13 @@ export class ClassHover implements Overlay {
       if (Math.hypot(e.clientX - this.down.x, e.clientY - this.down.y) < 8) { this.ptr = at(e); this.dirty = true; }
       this.down = null;
     });
+  }
+
+  /** fade all but these edge classes (null: back to normal); pointing at the view still wins */
+  focus(classes: number[] | null): void {
+    this.focused = classes;
+    this.picked = null; // so the next frame applies it
+    this.dirty = true;
   }
 
   build(): void {
@@ -58,9 +67,10 @@ export class ClassHover implements Overlay {
         next = { kind: edge ? 'edge' : 'vertex', cls: tag.cls, color: edge ? edgeColor(tag.cls) : vertColor(tag.cls) };
       }
     }
-    if (next?.kind === this.picked?.kind && next?.cls === this.picked?.cls) return;
+    if (this.picked && next?.kind === this.picked.kind && next?.cls === this.picked.cls) return;
     this.picked = next;
-    fade(ctx.body, ctx.crab, next);
+    if (next || !this.focused) fade(ctx.body, ctx.crab, next ? (t) => isPicked(t, next) : null);
+    else { const f = this.focused; fade(ctx.body, ctx.crab, (t) => (t.kind === 'tube' || t.kind === 'arrow') && f.includes(t.cls!)); }
     this.onChange?.(next);
   }
 }
@@ -68,7 +78,8 @@ export class ClassHover implements Overlay {
 const isPicked = (tag: PartTag, p: ClassInfo) =>
   tag.cls === p.cls && (p.kind === 'edge' ? tag.kind === 'tube' || tag.kind === 'arrow' : tag.kind === 'ball');
 
-function fade(body: Object3D, crab: Object3D | null, p: ClassInfo | null): void {
+/** dim every piece of the cell that `keep` rejects (null: dim nothing) */
+function fade(body: Object3D, crab: Object3D | null, keep: ((tag: PartTag) => boolean) | null): void {
   const set = (o: Object3D, dim: boolean) => {
     const m = (o as Mesh).material as Material | undefined;
     if (!m) return;
@@ -76,6 +87,6 @@ function fade(body: Object3D, crab: Object3D | null, p: ClassInfo | null): void 
     m.opacity = dim ? 0.12 : 1;
     m.depthWrite = !dim;
   };
-  for (const o of body.children) set(o, !!p && !isPicked(o.userData as PartTag, p));
-  crab?.traverse((o) => set(o, !!p));
+  for (const o of body.children) set(o, !!keep && !keep(o.userData as PartTag));
+  crab?.traverse((o) => set(o, !!keep));
 }

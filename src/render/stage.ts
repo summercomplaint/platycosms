@@ -3,9 +3,10 @@ import {
   MeshStandardMaterial, PerspectiveCamera, Points, PointsMaterial, Scene, Vector3, WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { PlatycosmDef } from '../data/platycosms';
+import { PlatycosmDef, byId } from '../data/platycosms';
 import { IDENTITY, Iso, apply, compose, inverse } from '../math/iso';
 import { Vec3 } from '../math/vec';
+import { I3, Mat3, inv3, mmul, mvec } from '../math/shape';
 import { Animator } from './animation';
 import { v3 } from './cellKit';
 import { PartTag, addLights, cellMeshes, frameCell, ghostGroup } from './cellGroup';
@@ -82,16 +83,18 @@ export class Stage {
     this.scene.background = this.bg;
     new ResizeObserver(() => this.resize()).observe(canvas);
     requestAnimationFrame(() => this.frame());
-    onEntriesChanged(() => { this.crabReady = true; if (this.entry) this.show(this.entry.def); });
+    onEntriesChanged(() => { this.crabReady = true; if (this.entry) this.show(byId(this.entry.def.id)!, this.entry.M); });
   }
 
   /* ---------- public ---------- */
-  show(def: PlatycosmDef): Entry {
-    const keep = this.entry && this.entry.def.id === def.id;
-    const e = entryFor(def);
+  /** Show a platycosm, in the shape M (see src/math/shape.ts). The same platycosm again keeps the camera. */
+  show(def: PlatycosmDef, M: Mat3 | null = null): Entry {
+    const prev = this.entry, keep = !!prev && prev.def.id === def.id;
+    const e = entryFor(def, M);
+    if (e === prev) return e;
     this.entry = e;
     if (!keep) { this.anim.stop(); this.faces.set(null); }
-    this.rebuild();
+    this.rebuild(keep ? prev : null);
     return e;
   }
 
@@ -181,17 +184,18 @@ export class Stage {
     this.scene.fog = null;
   }
 
-  private rebuild(): void {
+  /** build the view; with `prev` (the same platycosm in another shape) the camera stays where it was */
+  private rebuild(prev: Entry | null = null): void {
     this.clearViews();
     if (!this.entry) return;
-    if (this.mode === 'outside') this.buildOutside(this.entry);
-    else this.buildInside(this.entry);
+    if (this.mode === 'outside') this.buildOutside(this.entry, !!prev);
+    else this.buildInside(this.entry, prev);
     this.applyOptions();
     const ctx = this.context()!;
     for (const o of this.overlays) o.build?.(ctx);
   }
 
-  private buildOutside(e: Entry): void {
+  private buildOutside(e: Entry, keepCamera = false): void {
     this.orbit.enabled = true;
     this.fp.enabled = false;
     this.camera.fov = 30;
@@ -204,11 +208,11 @@ export class Stage {
     root.add(body, crab, ghost);
     this.scene.add(root, this.stars);
     this.outside = { root, body, crab, ghost };
-    frameCell(e, this.camera, this.orbit.target);
+    if (!keepCamera) frameCell(e, this.camera, this.orbit.target);
     this.orbit.update();
   }
 
-  private buildInside(e: Entry): void {
+  private buildInside(e: Entry, prev: Entry | null = null): void {
     this.orbit.enabled = false;
     this.fp.enabled = true;
     this.camera.fov = 80;
@@ -219,11 +223,17 @@ export class Stage {
     this.scene.add(this.tiles.group);
     const R = this.tileRadius(e);
     this.scene.fog = new Fog(this.bg, R * 0.45, R * 1.0);
-    // start halfway between the centre (where the crab is) and a corner, looking at the crab
-    const D = e.def.dom(), c = v3(e.kit.centroid);
-    this.fp.pos.copy(c).addScaledVector(v3(D.V[0]).sub(c), 0.55);
     this.fp.speed = 0.6 * e.L;
-    this.fp.lookAt(c);
+    if (prev) {
+      // the same point of the space in the new shape: map the position by M_new M_old⁻¹, keep the direction of view
+      const T = mmul(e.M ?? I3, inv3(prev.M ?? I3)), p = mvec(T, [this.fp.pos.x, this.fp.pos.y, this.fp.pos.z]);
+      this.fp.pos.set(p[0], p[1], p[2]);
+    } else {
+      // start halfway between the centre (where the crab is) and a corner, looking at the crab
+      const D = e.def.dom(), c = v3(e.kit.centroid);
+      this.fp.pos.copy(c).addScaledVector(v3(D.V[0]).sub(c), 0.55);
+      this.fp.lookAt(c);
+    }
     this.fp.apply();
     this.lastTilePos.set(Infinity, 0, 0);
     this.tilesDirty = true;
