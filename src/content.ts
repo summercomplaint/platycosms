@@ -14,7 +14,6 @@ export const content = {
   learn: (): string => get('learn/placeholder.md'),
   gluings: (mode: 'outside' | 'inside'): string => get(`gluings/${mode}.md`),
   description: (id: string): string => get(`platycosms/${id}/description.md`),
-  tagline: (id: string): string => get(`platycosms/${id}/tagline.md`),
   /** every file, for checks */
   all: (): string[] => Object.keys(files).filter((k) => !k.endsWith('README.md')).map((k) => files[k]),
 };

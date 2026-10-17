@@ -154,8 +154,7 @@ export const platycosmPage: PageMaker = (root, first) => {
     caption.hidden = !info;
     if (!info) return;
     caption.innerHTML = `<span class="dot" style="background:${info.color}"></span>` + (info.kind === 'edge'
-      ? 'These tubes are all one edge of the space. Each arrow shows which way the edge runs.'
-      : 'These balls are all one point of the space.');
+      ? 'All one edge' : 'All one point');
   };
 
   /* ---------- routes ---------- */

@@ -2,16 +2,10 @@ import { content } from '../content';
 import { PLATYCOSMS, PlatycosmDef } from '../data/platycosms';
 import type { PageMaker } from '../app/router';
 import { onTheme } from '../app/theme';
-import { onEntriesChanged } from '../render/entries';
 import { Previews } from '../render/previews';
 import { inline, paragraphs } from '../ui/markdown';
 
-const GROUPS: { title: string; note: string; ids: string[] }[] = [
-  { title: 'Orientable', note: 'Left and right stay the same wherever you go.', ids: ['c1', 'c2', 'c3', 'c4', 'c6', 'c22'] },
-  { title: 'Non-orientable', note: 'Some round trips bring you back as your own mirror image.', ids: ['a1p', 'a1m', 'a2p', 'a2m'] },
-];
-
-/** The front page: what a platycosm is on the left, the ten as cards on the right. */
+/** The front page: what a platycosm is on the left, the ten on the right, in Conway's order. */
 export const homePage: PageMaker = (root) => {
   root.innerHTML = `
     <div class="home">
@@ -20,14 +14,7 @@ export const homePage: PageMaker = (root) => {
         <div class="prose">${paragraphs(content.whatIs())}${paragraphs(content.howToRead())}</div>
         <a class="confused" href="#learn"><span>${inline(content.stillConfused())}</span><span class="go" aria-hidden="true">→</span></a>
       </aside>
-      <div class="home-list">
-        ${GROUPS.map((g) => `
-          <section class="group">
-            <h2>${g.title}</h2>
-            <p class="group-note">${g.note}</p>
-            <ol class="cards">${g.ids.map((id) => card(PLATYCOSMS.find((P) => P.id === id)!)).join('')}</ol>
-          </section>`).join('')}
-      </div>
+      <ol class="cards">${PLATYCOSMS.map(card).join('')}</ol>
     </div>`;
 
   // the previews: drawn one at a time after the page is up, so the text shows at once
@@ -54,15 +41,13 @@ export const homePage: PageMaker = (root) => {
     a.addEventListener('blur', () => previews.stop());
   }
   const offTheme = onTheme(() => requestAnimationFrame(drawAll));
-  const offEntries = onEntriesChanged(drawAll); // the crab arrived
   const ro = new ResizeObserver(() => drawAll());
-  ro.observe(root.querySelector('.home-list')!);
+  ro.observe(root.querySelector('.cards')!);
 
   return {
     destroy() {
       alive = false;
       offTheme();
-      offEntries();
       ro.disconnect();
       previews.dispose();
     },
@@ -73,9 +58,6 @@ function card(P: PlatycosmDef): string {
   return `
     <li><a class="card" href="#${P.id}">
       <canvas data-id="${P.id}" aria-hidden="true"></canvas>
-      <span class="card-text">
-        <span class="card-name"><span class="sym">${P.sym}</span> ${P.name}</span>
-        <span class="card-tag">${inline(content.tagline(P.id))}</span>
-      </span>
+      <span class="card-name"><span class="sym">${P.sym}</span> ${P.name}</span>
     </a></li>`;
 }

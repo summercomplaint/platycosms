@@ -18,7 +18,6 @@ Every piece of prose on the page lives in this folder, one small file per piece.
 | `intro/2-how-to-read.md` | home page, under the first; also on every platycosm page |
 | `home/still-confused.md` | the link box to the learn page, home page |
 | `learn/placeholder.md` | the learn page (a placeholder until we write it) |
-| `platycosms/<id>/tagline.md` | one line on that space's card on the home page (no links: the card is a link) |
 | `gluings/outside.md` | above the list of gluings, outside view |
 | `gluings/inside.md` | above the list of gluings, inside view |
 | `platycosms/<id>/description.md` | the main description of that space |

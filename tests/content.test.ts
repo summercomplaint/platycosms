@@ -10,14 +10,6 @@ describe('page text in content/', () => {
       expect(content.description(P.id).trim().length).toBeGreaterThan(50);
     });
   }
-  for (const P of PLATYCOSMS) {
-    it(P.id + ' has a short tagline for its card, without links (the card is a link)', () => {
-      const t = content.tagline(P.id).trim();
-      expect(t.length).toBeGreaterThan(20);
-      expect(t.length).toBeLessThan(120);
-      expect(t).not.toContain('](');
-    });
-  }
   it('has the intro, the learn page and both gluing notes', () => {
     for (const s of [content.whatIs(), content.howToRead(), content.stillConfused(), content.learn()]) expect(s.trim()).not.toBe('');
     expect(content.gluings('outside').trim()).not.toBe('');

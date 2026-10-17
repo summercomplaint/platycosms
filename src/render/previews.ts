@@ -31,9 +31,8 @@ export class Previews {
     if (target.width !== px) { target.width = px; target.height = px; }
 
     const e = entryFor(def);
-    const { body, crab } = cellMeshes(e.kit);
     const cell = new Group();
-    cell.add(body, crab);
+    cell.add(cellMeshes(e.kit).body); // no crab: on a card it is only clutter
     const c = e.kit.centroid;
     cell.matrixAutoUpdate = false;
     cell.matrix.makeTranslation(c[0], c[1], c[2]).multiply(new Matrix4().makeRotationZ(angle)).multiply(new Matrix4().makeTranslation(-c[0], -c[1], -c[2]));
